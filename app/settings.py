@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     # --- Core ---
-    app_name: str = "PerfReviewBot"
+    app_name: str = "Performance Assistant"
     secret_key: str = "dev-only-change-me"  # signs session cookies; override in prod
     debug: bool = True
 
