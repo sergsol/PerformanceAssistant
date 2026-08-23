@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-xl font-medium mb-4">History</h1>
+{% if not items %}
+  <p class="text-slate-600">No assessments yet.</p>
+{% else %}
+<div class="space-y-2">
+{% for item in items %}
+  {% set result = item.result %}
+  {% set band_color = {'Below':'bg-red-100 text-red-800','Meets':'bg-emerald-100 text-emerald-800','Exceeds':'bg-indigo-100 text-indigo-800'} %}
+  <div x-data="{ open: false }" class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+
+    {# Collapsed row — click to expand #}
+    <button @click="open = !open"
+            class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors">
+      <span class="text-sm text-slate-500 shrink-0">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      <span class="flex-1 text-sm text-slate-700 truncate">{{ item.self_report }}</span>
+      <span class="text-xs font-medium px-2.5 py-1 rounded shrink-0 {{ band_color[item.overall_band] }}">
+        {{ item.overall_band }}{% if result.trending %} — trending {{ result.trending }}{% endif %}
+      </span>
+      <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-slate-400 shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+
+    {# Expanded detail #}
+    <div x-show="open" x-cloak class="border-t border-slate-100 px-4 py-4 space-y-4">
+
+      {# User input #}
+      <div>
+        <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">What you reported</p>
+        <p class="text-sm text-slate-700 whitespace-pre-wrap">{{ item.self_report }}</p>
+      </div>
+
+      {# Overall summary #}
+      <div>
+        <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Overall</p>
+        <p class="text-sm text-slate-700">{{ result.overall_summary }}</p>
+      </div>
+
+      {# Per-dimension breakdown #}
+      <div>
+        <p class="text-xs text-slate-500 uppercase tracking-wide mb-2">By dimension</p>
+        <div class="space-y-2">
+          {% for d in result.dimensions %}
+          <div class="rounded-lg border border-slate-100 px-3 py-2">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="flex-1 text-sm font-medium">{{ d.dimension }}</span>
+              <span class="text-xs font-medium px-2 py-0.5 rounded {{ band_color[d.band] }}">{{ d.band }}</span>
+            </div>
+            {% if d.evidence %}
+            <p class="text-xs text-slate-600 mb-0.5"><span class="font-medium">Evidence:</span> {{ d.evidence | join('; ') }}</p>
+            {% endif %}
+            {% if d.gap %}
+            <p class="text-xs text-slate-500"><span class="font-medium">Gap:</span> {{ d.gap }}</p>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {# Recommendations #}
+      {% if result.recommendations %}
+      <div class="bg-slate-50 rounded-lg px-3 py-3">
+        <p class="text-xs text-slate-500 uppercase tracking-wide mb-2">Recommendations</p>
+        <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+          {% for r in result.recommendations %}<li>{{ r }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

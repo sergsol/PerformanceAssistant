@@ -1,0 +1,50 @@
+[project]
+name = "perfreviewbot"
+version = "0.1.0"
+description = "AI-powered QA self-assessment assistant (portfolio project demonstrating AI-native QA testing)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.12",       # form parsing
+    "sqlmodel>=0.0.22",
+    "pydantic-settings>=2.6",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt<5",                            # bcrypt 5.x breaks passlib's internal test
+    "itsdangerous>=2.2",              # signed session cookies
+    "httpx>=0.27",                    # LLM calls + test client
+    "pyyaml>=6.0",
+    "psycopg[binary]>=3.2",          # Postgres driver (prod)
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "playwright>=1.48",
+    "pytest-playwright>=0.5",
+    "schemathesis>=3.38",
+    "deepeval>=1.5",
+    "ruff>=0.7",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+# UI tests need a running server / browser; keep them opt-in in CI stages
+markers = [
+    "ui: end-to-end Playwright tests (require browser)",
+    "evals: AI eval tests (require live LLM API key)",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]

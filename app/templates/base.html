@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PerfReviewBot{% endblock %}</title>
+  <link rel="stylesheet" href="/static/tailwind.css">
+  <style>[x-cloak]{display:none}</style>
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+  <nav class="border-b border-slate-200 bg-white">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-4 text-sm">
+      <a href="/" class="font-medium">PerfReviewBot</a>
+      <a href="/" class="text-slate-600 hover:text-slate-900">New assessment</a>
+      <a href="/history" class="text-slate-600 hover:text-slate-900">History</a>
+      <a href="/profile" class="text-slate-600 hover:text-slate-900">Profile</a>
+      <form action="/logout" method="post" class="ml-auto">
+        <button class="text-slate-500 hover:text-slate-900">Log out</button>
+      </form>
+    </div>
+  </nav>
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex items-center gap-3 mb-6">
+  <div class="w-11 h-11 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-medium">
+    {{ profile.display_name[0]|upper }}</div>
+  <div>
+    <p class="font-medium">{{ profile.display_name }} &middot; {{ profile.title }}</p>
+    <p class="text-sm text-slate-600">{{ profile.company or '' }}{% if profile.tech_context %} &middot; {{ profile.tech_context }}{% endif %}</p>
+  </div>
+</div>
+
+<h1 class="text-xl font-medium mb-2">New assessment</h1>
+<p class="text-sm text-slate-600 mb-4">Describe what you&rsquo;ve been doing this cycle. The assistant grades against the {{ profile.level }} scorecard.</p>
+
+{% if tips %}
+<div x-data="{ open: false }" class="mb-4 border border-slate-200 rounded-xl overflow-hidden">
+  <button @click="open = !open"
+          class="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+    <svg :class="open ? 'rotate-90' : ''" class="w-4 h-4 text-slate-400 shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+    </svg>
+    Tips for a stronger self-report
+  </button>
+  <div x-show="open" x-cloak class="border-t border-slate-100 px-4 py-3 space-y-3">
+    <p class="text-xs text-slate-500">Include <strong>activity + who was affected + measurable outcome</strong>. The model scores evidence, not effort.</p>
+    <div class="space-y-2">
+      {% for tip in tips %}
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div class="bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-slate-600">
+          <span class="block text-red-500 font-medium mb-0.5">Instead of</span>
+          {{ tip.weak }}
+        </div>
+        <div class="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 text-slate-700">
+          <span class="block text-emerald-600 font-medium mb-0.5">Write</span>
+          {{ tip.strong }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<form hx-post="/assess" hx-target="#result" hx-swap="innerHTML" hx-indicator="#spin" class="space-y-3">
+  <textarea name="self_report" rows="6" required
+    placeholder="e.g. I write automated UI and API tests and report bugs..."
+    class="w-full border border-slate-300 rounded-lg px-3 py-2"></textarea>
+  <button class="bg-slate-900 text-white rounded-lg px-4 py-2">Assess</button>
+  <span id="spin" class="htmx-indicator text-sm text-slate-500">Assessing&hellip;</span>
+</form>
+
+<div id="result" class="mt-6"></div>
+{% endblock %}
