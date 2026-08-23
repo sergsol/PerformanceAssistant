@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 class AssessRequest(BaseModel):
     # These come from the stored profile at assess time, but the API also
     # accepts them directly for programmatic use / testing.
+    scorecard_role: str = Field(default="senior_qa", examples=["senior_qa", "po", "mid_dev"])
     title: str = Field(examples=["Senior QA Engineer"])
     level: str = Field(examples=["Senior"])
     company: str | None = Field(default=None, examples=["Digital Turbine"])

@@ -7,7 +7,8 @@ also persists history.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter
+import httpx
+from fastapi import APIRouter, HTTPException
 
 from app.schemas.request import AssessRequest
 from app.schemas.result import AssessResult
@@ -21,4 +22,10 @@ router = APIRouter(prefix="/api", tags=["api"])
 @router.post("/assess", response_model=AssessResult)
 def api_assess(req: AssessRequest) -> AssessResult:
     client = get_llm_client()
-    return assess(req, client, temperature=get_settings().llm_temperature)
+    try:
+        return assess(req, client, role=req.scorecard_role,
+                      temperature=get_settings().llm_temperature)
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=502, detail=f"LLM API error: {exc.response.status_code} {exc.response.text[:300]}")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
