@@ -10,9 +10,9 @@
 <p class="text-sm text-slate-600 mb-2">By dimension</p>
 <div class="space-y-2 mb-4">
 {% for d in result.dimensions %}
-  <div class="flex items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-2">
+  <div class="flex items-start sm:items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-3">
     <span class="flex-1 text-sm">{{ d.dimension }}</span>
-    <span class="text-xs font-medium px-2.5 py-1 rounded {{ band_color[d.band.value] }}">{{ d.band.value }}</span>
+    <span class="text-xs font-medium px-2.5 py-1 rounded shrink-0 {{ band_color[d.band.value] }}">{{ d.band.value }}</span>
   </div>
 {% endfor %}
 </div>

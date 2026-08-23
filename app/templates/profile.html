@@ -78,7 +78,7 @@
 
   <label class="block text-sm">Display name
     <input name="display_name" required value="{{ profile.display_name if profile else '' }}"
-           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2"></label>
+           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 text-base"></label>
 
   <div class="grid grid-cols-2 gap-3">
     <label class="block text-sm">Role
@@ -104,19 +104,19 @@
 
   <label class="block text-sm">Title <span class="text-slate-400 font-normal">(auto-filled, editable)</span>
     <input name="title" x-model="title"
-           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2"></label>
+           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 text-base"></label>
 
   <label class="block text-sm">Company
     <input name="company" value="{{ profile.company if profile else '' }}"
-           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2"></label>
+           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 text-base"></label>
 
   <label class="block text-sm">Tech context <span class="text-slate-400 font-normal">(optional)</span>
     <input name="tech_context" value="{{ profile.tech_context if profile else '' }}"
            placeholder="e.g. ad-tech SaaS, Python/FastAPI, ~30 engineers"
-           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+           class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 text-base">
     <span class="block mt-1 text-xs text-slate-400">Your product domain, stack, or scale — 1–2 sentences. Helps the AI grade terminology and tooling decisions in the right context.</span>
   </label>
 
-  <button class="bg-slate-900 text-white rounded-lg px-4 py-2">Save profile</button>
+  <button class="w-full sm:w-auto bg-slate-900 text-white rounded-lg px-6 py-3 text-base font-medium">Save profile</button>
 </form>
 {% endblock %}

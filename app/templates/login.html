@@ -2,15 +2,15 @@
 {% block content %}
 <h1 class="text-xl font-medium mb-4">Log in</h1>
 {% if error %}
-<p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3 max-w-sm">{{ error }}</p>
+<p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{{ error }}</p>
 {% endif %}
-<form action="/login" method="post" class="space-y-3 max-w-sm">
+<form action="/login" method="post" class="space-y-3 w-full max-w-sm">
   <input name="email" type="email" placeholder="name@company.com" required
          value="{{ email or '' }}"
-         class="w-full border border-slate-300 rounded-lg px-3 py-2">
+         class="w-full border border-slate-300 rounded-lg px-3 py-3 text-base">
   <input name="password" type="password" placeholder="Password" required
-         class="w-full border border-slate-300 rounded-lg px-3 py-2">
-  <button class="bg-slate-900 text-white rounded-lg px-4 py-2">Log in</button>
+         class="w-full border border-slate-300 rounded-lg px-3 py-3 text-base">
+  <button class="w-full bg-slate-900 text-white rounded-lg px-4 py-3 text-base font-medium">Log in</button>
 </form>
 <p class="text-sm text-slate-600 mt-4">No account? <a href="/register" class="underline">Register</a></p>
 {% endblock %}

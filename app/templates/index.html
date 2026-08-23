@@ -25,7 +25,7 @@
     <p class="text-xs text-slate-500">Include <strong>activity + who was affected + measurable outcome</strong>. The model scores evidence, not effort.</p>
     <div class="space-y-2">
       {% for tip in tips %}
-      <div class="grid grid-cols-2 gap-2 text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
         <div class="bg-red-50 border border-red-100 rounded-lg px-3 py-2 text-slate-600">
           <span class="block text-red-500 font-medium mb-0.5">Instead of</span>
           {{ tip.weak }}
@@ -44,8 +44,8 @@
 <form hx-post="/assess" hx-target="#result" hx-swap="innerHTML" hx-indicator="#spin" class="space-y-3">
   <textarea name="self_report" rows="6" required
     placeholder="e.g. I write automated UI and API tests and report bugs..."
-    class="w-full border border-slate-300 rounded-lg px-3 py-2"></textarea>
-  <button class="bg-slate-900 text-white rounded-lg px-4 py-2">Assess</button>
+    class="w-full border border-slate-300 rounded-lg px-3 py-3 text-base"></textarea>
+  <button class="w-full sm:w-auto bg-slate-900 text-white rounded-lg px-6 py-3 text-base font-medium">Assess</button>
   <span id="spin" class="htmx-indicator text-sm text-slate-500">Assessing&hellip;</span>
 </form>
 
