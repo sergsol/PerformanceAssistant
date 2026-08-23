@@ -9,7 +9,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.3"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
   <nav class="border-b border-slate-200 bg-white">
     <div class="max-w-3xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
       <a href="/" class="font-medium">PerfReviewBot</a>
@@ -23,7 +23,7 @@
       {% endif %}
     </div>
   </nav>
-  <main class="max-w-3xl mx-auto px-4 py-6">
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-6">
     {% block content %}{% endblock %}
   </main>
 </body>
