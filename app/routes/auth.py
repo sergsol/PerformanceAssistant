@@ -16,6 +16,8 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/register", response_class=HTMLResponse)
 def register_form(request: Request):
+    if request.session.get("user_id"):
+        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(request, "register.html", {})
 
 
@@ -43,6 +45,8 @@ def register(
 
 @router.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
+    if request.session.get("user_id"):
+        return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse(request, "login.html", {})
 
 
