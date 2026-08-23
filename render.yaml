@@ -1,5 +1,6 @@
-# Render blueprint: web service + free Postgres.
-# Push this repo, "New +" -> "Blueprint", point at the repo.
+# Render blueprint: web service only.
+# Database is hosted on Neon (free, no expiry) — set DATABASE_URL manually in the dashboard.
+# Deploy: New + → Blueprint → connect repo → set GEMINI_API_KEY and DATABASE_URL in env vars.
 services:
   - type: web
     name: perfreviewbot
@@ -11,14 +12,8 @@ services:
       - key: LLM_PROVIDER
         value: gemini
       - key: GEMINI_API_KEY
-        sync: false            # set in dashboard, not committed
+        sync: false            # paste your key in the Render dashboard
       - key: GEMINI_MODEL
         value: gemini-3.6-flash
       - key: DATABASE_URL
-        fromDatabase:
-          name: perfreviewbot-db
-          property: connectionString
-
-databases:
-  - name: perfreviewbot-db
-    plan: free
+        sync: false            # paste your Neon connection string in the Render dashboard
