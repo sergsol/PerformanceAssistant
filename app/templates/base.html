@@ -13,12 +13,14 @@
   <nav class="border-b border-slate-200 bg-white">
     <div class="max-w-3xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
       <a href="/" class="font-medium">PerfReviewBot</a>
+      {% if request.session.get('user_id') %}
       <a href="/" class="text-slate-600 hover:text-slate-900">Assess</a>
       <a href="/history" class="text-slate-600 hover:text-slate-900">History</a>
       <a href="/profile" class="text-slate-600 hover:text-slate-900">Profile</a>
       <form action="/logout" method="post" class="ml-auto">
         <button class="text-slate-500 hover:text-slate-900">Log out</button>
       </form>
+      {% endif %}
     </div>
   </nav>
   <main class="max-w-3xl mx-auto px-4 py-6">
