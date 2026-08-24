@@ -43,21 +43,21 @@ const ROLES: Record<string, RoleGroup> = {
   },
 }
 
-function roleFromKey(key: string): { role: string; level: RoleLevel } {
+function roleFromKey(key: string): { role: string; level: RoleLevel } | null {
   for (const [roleId, group] of Object.entries(ROLES)) {
     const level = group.levels.find(l => l.key === key)
     if (level) return { role: roleId, level }
   }
-  return { role: 'qa', level: ROLES.qa.levels[3] } // default senior_qa
+  return null
 }
 
 export default function Profile() {
   const [form, setForm] = useState<ProfileType>({
-    display_name: '', title: 'Senior QA Engineer', level: 'Senior',
-    scorecard_role: 'senior_qa', company: null, tech_context: null,
+    display_name: '', title: '', level: '',
+    scorecard_role: '', company: null, tech_context: null,
   })
-  const [selectedRole, setSelectedRole] = useState('qa')
-  const [selectedLevelKey, setSelectedLevelKey] = useState('senior_qa')
+  const [selectedRole, setSelectedRole] = useState('')
+  const [selectedLevelKey, setSelectedLevelKey] = useState('')
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -67,18 +67,16 @@ export default function Profile() {
     getProfile()
       .then(p => {
         setForm(p)
-        const { role, level } = roleFromKey(p.scorecard_role)
-        setSelectedRole(role)
-        setSelectedLevelKey(level.key)
+        const found = roleFromKey(p.scorecard_role)
+        if (found) { setSelectedRole(found.role); setSelectedLevelKey(found.level.key) }
       })
       .catch(() => {}) // 404 = no profile yet, that's fine
   }, [])
 
   function handleRoleChange(role: string) {
     setSelectedRole(role)
-    const firstLevel = ROLES[role].levels[0]
-    setSelectedLevelKey(firstLevel.key)
-    setForm(f => ({ ...f, scorecard_role: firstLevel.key, title: firstLevel.title, level: firstLevel.label }))
+    setSelectedLevelKey('')
+    setForm(f => ({ ...f, scorecard_role: '', title: '', level: '' }))
   }
 
   function handleLevelChange(levelKey: string) {
@@ -109,7 +107,7 @@ export default function Profile() {
         <h1 className="text-xl font-medium mb-6">Profile</h1>
         {!profileComplete && (
           <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
-            Fill in your display name and save your profile to unlock Assess and History.
+            Fill in the required fields and save your profile before starting an assessment.
           </p>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,14 +119,16 @@ export default function Profile() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Role</label>
-              <select value={selectedRole} onChange={e => handleRoleChange(e.target.value)} className={inputCls}>
+              <select value={selectedRole} onChange={e => handleRoleChange(e.target.value)} required className={inputCls}>
+                <option value="" disabled>— Select role —</option>
                 {Object.entries(ROLES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
             <div>
               <label className={labelCls}>Level</label>
-              <select value={selectedLevelKey} onChange={e => handleLevelChange(e.target.value)} className={inputCls}>
-                {ROLES[selectedRole].levels.map(l => <option key={l.key} value={l.key}>{l.label}</option>)}
+              <select value={selectedLevelKey} onChange={e => handleLevelChange(e.target.value)} required disabled={!selectedRole} className={inputCls}>
+                <option value="" disabled>— Select level —</option>
+                {selectedRole && ROLES[selectedRole].levels.map(l => <option key={l.key} value={l.key}>{l.label}</option>)}
               </select>
             </div>
           </div>
