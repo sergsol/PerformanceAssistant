@@ -3,6 +3,7 @@ import Nav from '../components/Nav'
 import { getProfile, updateProfile } from '../api/profile'
 import { ApiError } from '../api/client'
 import type { Profile as ProfileType } from '../types'
+import { useProfileCtx } from '../context/ProfileContext'
 
 interface RoleLevel { key: string; label: string; title: string }
 interface RoleGroup { label: string; levels: RoleLevel[] }
@@ -60,6 +61,7 @@ export default function Profile() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const { profileComplete, markProfileComplete } = useProfileCtx()
 
   useEffect(() => {
     getProfile()
@@ -91,6 +93,7 @@ export default function Profile() {
     try {
       await updateProfile(form)
       setSaved(true)
+      markProfileComplete()
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong')
     } finally { setLoading(false) }
@@ -104,6 +107,11 @@ export default function Profile() {
       <Nav />
       <main className="max-w-3xl mx-auto px-4 py-6">
         <h1 className="text-xl font-medium mb-6">Profile</h1>
+        {!profileComplete && (
+          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+            Fill in your display name and save your profile to unlock Assess and History.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className={labelCls}>Display name</label>
