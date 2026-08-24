@@ -25,3 +25,5 @@ tailwindcss
 
 # OS
 .DS_Store
+node_modules/
+local.db

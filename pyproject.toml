@@ -12,7 +12,7 @@ dependencies = [
     "pydantic-settings>=2.6",
     "passlib[bcrypt]>=1.7.4",
     "bcrypt<5",                            # bcrypt 5.x breaks passlib's internal test
-    "itsdangerous>=2.2",              # signed session cookies
+    "python-jose[cryptography]>=3.3",  # JWT tokens
     "httpx>=0.27",                    # LLM calls + test client
     "pyyaml>=6.0",
     "psycopg[binary]>=3.2",          # Postgres driver (prod)
