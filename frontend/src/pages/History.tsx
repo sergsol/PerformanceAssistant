@@ -47,9 +47,13 @@ export default function History() {
                     {isOpen ? 'Hide' : 'View'}
                   </button>
                 </div>
-                <p className="text-sm text-slate-600 mt-2 line-clamp-2">{item.self_report}</p>
+                {!isOpen && <p className="text-sm text-slate-600 mt-2 line-clamp-2">{item.self_report}</p>}
                 {isOpen && (
                   <div className="mt-4 border-t border-slate-100 pt-4 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium text-slate-500 mb-1">What you wrote</p>
+                      <p className="text-sm text-slate-700 whitespace-pre-wrap bg-slate-50 rounded-lg px-3 py-2">{item.self_report}</p>
+                    </div>
                     <p className="text-sm text-slate-700">{result.overall_summary}</p>
                     <div className="space-y-2">
                       {result.dimensions.map(d => (
