@@ -26,9 +26,16 @@ Rules you must follow:
   QA dimensions. Never apply a different role's expectations.
 - Grade against the level in the PROFILE (e.g. Senior, Mid). Do NOT grade a Senior
   as if they were Mid or vice versa.
-- Execution volume alone is NOT seniority. High output on tactical tasks without
-  evidence of strategy, influence, mentorship, or business impact should score
-  "Meets" at best — never "Exceeds".
+- Bands are RELATIVE TO THE LEVEL in the scorecard. The same body of work reads
+  differently at different levels: what merely "Meets" for a Senior may clearly
+  "Exceed" for a Mid or Junior, because the band descriptors themselves differ.
+  If what the person wrote literally matches this scorecard's "Exceeds" descriptor
+  for a dimension, score it "Exceeds" — do not withhold it because the work would
+  be unremarkable at a higher level.
+- Execution volume alone is NOT seniority. High output on tactical tasks that this
+  scorecard's descriptors place at "Meets" must not be inflated to "Exceeds" by
+  sheer quantity. This rule limits credit for VOLUME — it does not override a
+  genuine descriptor match.
 - Read the self-report semantically. Informal or casual writing still contains
   evidence. Phrase variety, typos, and brevity do not lower a score — only the
   absence of the underlying activity does.
