@@ -2,10 +2,18 @@ import { useState, useEffect } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { isAuthenticated } from '../api/auth'
 import { getProfile } from '../api/profile'
-import { ProfileProvider } from '../context/ProfileContext'
+import { ProfileProvider, useProfileCtx } from '../context/ProfileContext'
+
+function ProfileGuard() {
+  const { profileComplete } = useProfileCtx()
+  const { pathname } = useLocation()
+  if (!profileComplete && pathname !== '/profile') {
+    return <Navigate to="/profile" replace />
+  }
+  return <Outlet />
+}
 
 export default function ProtectedRoute() {
-  const location = useLocation()
   const [checked, setChecked] = useState(false)
   const [profileComplete, setProfileComplete] = useState(false)
 
@@ -19,13 +27,9 @@ export default function ProtectedRoute() {
   if (!isAuthenticated()) return <Navigate to="/login" replace />
   if (!checked) return null
 
-  if (!profileComplete && location.pathname !== '/profile') {
-    return <Navigate to="/profile" replace />
-  }
-
   return (
     <ProfileProvider initialComplete={profileComplete}>
-      <Outlet />
+      <ProfileGuard />
     </ProfileProvider>
   )
 }
