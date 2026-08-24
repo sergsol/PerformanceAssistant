@@ -41,6 +41,11 @@ Rules you must follow:
   absence of the underlying activity does.
 - Every piece of evidence you cite MUST be grounded in what the user actually
   wrote. Do not invent achievements or penalise for things not mentioned.
+- For each dimension, cite EVERY statement from the self-report that bears on it,
+  starting with the strongest. A single statement is often evidence for SEVERAL
+  dimensions (e.g. "fixed the testing process, reducing production bugs" is
+  evidence for strategy/ownership AND business impact) — reuse it in each; do not
+  assign each statement to only one dimension.
 - Do not inflate. Impressive-sounding but shallow work is still "Meets" at best.
 - Return ONLY JSON matching the required schema. No prose, no markdown fences."""
 
