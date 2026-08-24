@@ -73,11 +73,22 @@ WHAT THE PERSON DID THIS CYCLE
 Return JSON exactly matching this shape (one dimension object per scorecard dimension):
 {json.dumps(schema_hint, indent=2)}
 
+Gap rules (the "gap" field per dimension):
+- For every dimension not at "Exceeds", state the SPECIFIC missing behavior, quoting the
+  next band's expectation from the scorecard and contrasting it with what the person wrote.
+- Phrase it as what is absent, e.g. "You describe writing tests, but nothing shows you
+  choosing WHAT to test based on risk — that is the difference between Meets and Exceeds here."
+- Never leave gap null for a "Below" or "Meets" dimension.
+
 Recommendations rules:
 - Include at least one recommendation for EVERY dimension that scored "Meets", stating
   the specific concrete action that would push it to "Exceeds" at this level.
 - Include a recommendation for every dimension that scored "Below".
-- Recommendations must be specific to what the person wrote — not generic advice.
+- Each recommendation must be a concrete action the person can start NEXT CYCLE, with a
+  verifiable artifact or outcome (a document they write, a metric they move, a person they
+  mentor, a meeting they run) — not an attitude change or generic advice.
+- Where possible, build on something the person already does (e.g. "You already run the
+  regression suite — next, write the risk-based test strategy for that area and get sign-off").
 - Do not skip a dimension just because the person scored well overall."""
     return _SYSTEM, user
 

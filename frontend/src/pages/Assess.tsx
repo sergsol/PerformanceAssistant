@@ -156,18 +156,44 @@ export default function Assess() {
             <p className="text-sm text-slate-600 mb-2">By dimension</p>
             <div className="space-y-2 mb-4">
               {result.dimensions.map(d => (
-                <div key={d.dimension} className="flex items-start sm:items-center gap-3 bg-white border border-slate-200 rounded-lg px-4 py-3">
-                  <span className="flex-1 text-sm">{d.dimension}</span>
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded shrink-0 ${BAND_COLOR[d.band]}`}>{d.band}</span>
+                <div key={d.dimension} className="bg-white border border-slate-200 rounded-lg px-4 py-3">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <span className="flex-1 text-sm font-medium">{d.dimension}</span>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded shrink-0 ${BAND_COLOR[d.band]}`}>{d.band}</span>
+                  </div>
+                  {d.evidence.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs font-medium text-emerald-700 mb-1">What supported this score</p>
+                      <ul className="text-sm text-slate-700 space-y-1">
+                        {d.evidence.map((ev, i) => (
+                          <li key={i} className="flex gap-2"><span className="text-emerald-600 shrink-0">✓</span>{ev}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {d.evidence.length === 0 && d.band === 'Below' && (
+                    <p className="mt-2 text-sm text-slate-500 italic">No evidence found for this dimension in what you wrote.</p>
+                  )}
+                  {d.gap && (
+                    <div className="mt-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                      <p className="text-xs font-medium text-amber-800 mb-0.5">To reach the next band</p>
+                      <p className="text-sm text-amber-900">{d.gap}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
 
             {result.recommendations.length > 0 && (
-              <div className="bg-slate-100 rounded-xl p-4">
-                <p className="text-sm text-slate-600 mb-2">Recommendations</p>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  {result.recommendations.map((r, i) => <li key={i}>{r}</li>)}
+              <div className="bg-slate-900 text-white rounded-xl p-4">
+                <p className="text-sm font-medium mb-2">Your action plan for next cycle</p>
+                <ul className="text-sm space-y-2">
+                  {result.recommendations.map((r, i) => (
+                    <li key={i} className="flex gap-2.5">
+                      <span className="shrink-0 w-5 h-5 rounded-full bg-white/15 flex items-center justify-center text-xs">{i + 1}</span>
+                      {r}
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
