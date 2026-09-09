@@ -1,12 +1,10 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { logout } from '../api/auth'
+import { Link, useLocation } from 'react-router-dom'
 import { useProfileCtx } from '../context/ProfileContext'
 
 const NAV = [{ to: '/', label: 'Assess' }, { to: '/history', label: 'History' }, { to: '/profile', label: 'Profile' }]
 
 export default function Nav() {
   const { pathname } = useLocation()
-  const navigate = useNavigate()
   const { profileComplete } = useProfileCtx()
 
   return (
@@ -30,8 +28,6 @@ export default function Nav() {
             </Link>
           )
         })}
-        <button onClick={() => { logout(); navigate('/login') }}
-          className="ml-auto text-slate-500 hover:text-slate-900">Log out</button>
       </div>
     </nav>
   )
