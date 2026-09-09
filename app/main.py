@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import init_db
-from app.routes import api, api_auth, api_profile, api_history
+from app.routes import api, api_profile, api_history
 from app.settings import get_settings
 
 @asynccontextmanager
@@ -21,7 +21,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.include_router(api_auth.router)
+    # Auth endpoints removed for anonymous/minimal flow:
+    # app.include_router(api_auth.router)
     app.include_router(api_profile.router)
     app.include_router(api_history.router)
     app.include_router(api.router)
