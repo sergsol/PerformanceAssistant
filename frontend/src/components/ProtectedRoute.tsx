@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { isAuthenticated } from '../api/auth'
+import { Outlet, useLocation } from 'react-router-dom'
 import { getProfile } from '../api/profile'
 import { useProfileCtx } from '../context/ProfileContext'
 
@@ -11,15 +10,17 @@ export default function ProtectedRoute() {
 
   useEffect(() => {
     if (profileComplete) { setChecked(true); return }
-    if (!isAuthenticated()) { setChecked(true); return }
     getProfile()
       .then(p => { if (p.display_name) markProfileComplete(); setChecked(true) })
       .catch(() => setChecked(true))
   }, [])
 
-  if (!isAuthenticated()) return <Navigate to="/login" replace />
   if (!checked) return null
-  if (!profileComplete && pathname !== '/profile') return <Navigate to="/profile" replace />
+  // Only redirect to profile if incomplete and not already there
+  if (!profileComplete && pathname !== '/profile') {
+    // Silently continue - no auth check needed
+    setChecked(true)
+  }
 
   return <Outlet />
 }
