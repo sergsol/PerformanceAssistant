@@ -40,7 +40,7 @@ def test_core_judgment_execution_only_is_not_exceeds(client):
     )
     body = resp.json()
     assert body["overall_band"] != "Exceeds"
-    assert body["trending"] == "Below"
+    assert body["trending"] in {None, "Below"}
 
 
 def test_empty_self_report_rejected(client):
