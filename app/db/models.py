@@ -6,6 +6,7 @@ signal worth stating in the README.
 """
 from datetime import datetime, timezone
 from typing import List, Optional
+from uuid import uuid4
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -16,7 +17,7 @@ def _utcnow() -> datetime:
 
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    session_id: str | None = Field(default=None, index=True, unique=True)
+    session_id: str = Field(default_factory=lambda: f"session_{uuid4()}", index=True, unique=True)
     email: str | None = Field(default=None, index=True, unique=True)
     password_hash: str | None = None
     created_at: datetime = Field(default_factory=_utcnow)

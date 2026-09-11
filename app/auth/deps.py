@@ -18,12 +18,13 @@ def _get_or_create_anonymous_user(session_id: str, session: Session) -> User:
     try:
         session.commit()
         session.refresh(user)
+        return user
     except IntegrityError:
         session.rollback()
-        user = session.exec(select(User).where(User.session_id == session_id)).first()
-        if user is None:
+        persisted_user = session.exec(select(User).where(User.session_id == session_id)).first()
+        if persisted_user is None:
             raise
-    return user
+        return persisted_user
 
 
 def get_current_user(request: Request, session: Session = Depends(get_session)) -> User | SimpleNamespace:

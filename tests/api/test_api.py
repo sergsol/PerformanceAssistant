@@ -104,6 +104,13 @@ def test_data_isolation_between_users(client):
 def test_legacy_user_id_header_still_resolves_session(client):
     legacy_headers = {"X-User-Id": "legacy-session"}
     client.put("/api/profile", json=_profile_payload("Legacy"), headers=legacy_headers)
-    resp = client.get("/api/profile", headers=legacy_headers)
-    assert resp.status_code == 200
-    assert resp.json()["display_name"] == "Legacy"
+    client.post(
+        "/api/assess",
+        json={"self_report": "I write tests and report bugs."},
+        headers=legacy_headers,
+    )
+    profile_resp = client.get("/api/profile", headers=legacy_headers)
+    history_resp = client.get("/api/history", headers=legacy_headers)
+    assert profile_resp.status_code == 200
+    assert profile_resp.json()["display_name"] == "Legacy"
+    assert len(history_resp.json()) == 1
