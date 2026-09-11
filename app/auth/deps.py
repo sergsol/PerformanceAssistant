@@ -30,7 +30,7 @@ def _get_or_create_anonymous_user(session_id: str, session: Session) -> User:
 def get_current_user(request: Request, session: Session = Depends(get_session)) -> User | SimpleNamespace:
     """
     Extract user from JWT token in Authorization header: Bearer <token>
-    Falls back to header-based identity (X-User-Id / X-User-Email) for backward compatibility.
+    Falls back to header-based identity via X-Session-Id or numeric X-User-Id.
     If no valid auth is found, returns an anonymous user object.
     """
     
@@ -47,12 +47,12 @@ def get_current_user(request: Request, session: Session = Depends(get_session)) 
             pass  # Fall through to headers/anonymous
     
     # Try anonymous session header
-    session_id = request.headers.get("X-Session-Id") or request.headers.get("X-User-Id")
+    session_id = request.headers.get("X-Session-Id")
     if session_id:
         return _get_or_create_anonymous_user(session_id, session)
 
     # Try numeric id header for backward compatibility
-    user_id = request.headers.get("X-Db-User-Id")
+    user_id = request.headers.get("X-User-Id")
     if user_id:
         try:
             user = session.get(User, int(user_id))
@@ -60,19 +60,9 @@ def get_current_user(request: Request, session: Session = Depends(get_session)) 
                 return user
         except (ValueError, TypeError):
             pass
-    
-    # Try email header
-    user_email = request.headers.get("X-User-Email")
-    if user_email:
-        try:
-            user = session.exec(select(User).where(User.email == user_email)).first()
-            if user:
-                return user
-        except Exception:
-            pass
-    
+
     # Fallback anonymous user (has id and email attributes so routes expecting them won't crash)
-    return SimpleNamespace(id=None, email=user_email or None)
+    return SimpleNamespace(id=None, email=None)
     
 
 def require_user(user: User | SimpleNamespace = Depends(get_current_user)) -> User | SimpleNamespace:

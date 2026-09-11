@@ -1,6 +1,11 @@
 """API tests for anonymous session profile, assess, and history flows."""
 from __future__ import annotations
 
+from sqlmodel import Session, select
+
+from app.db.models import User
+from app.db.session import engine
+
 
 SESSION_A = {"X-Session-Id": "session-a"}
 SESSION_B = {"X-Session-Id": "session-b"}
@@ -101,16 +106,19 @@ def test_data_isolation_between_users(client):
     assert resp.json() == []
 
 
-def test_legacy_user_id_header_still_resolves_session(client):
-    legacy_headers = {"X-User-Id": "legacy-session"}
-    client.put("/api/profile", json=_profile_payload("Legacy"), headers=legacy_headers)
+def test_numeric_user_id_header_still_resolves_existing_user(client):
+    client.put("/api/profile", json=_profile_payload("Legacy"), headers=SESSION_A)
     client.post(
         "/api/assess",
         json={"self_report": "I write tests and report bugs."},
-        headers=legacy_headers,
+        headers=SESSION_A,
     )
-    profile_resp = client.get("/api/profile", headers=legacy_headers)
-    history_resp = client.get("/api/history", headers=legacy_headers)
+    with Session(engine) as session:
+        user = session.exec(select(User).where(User.session_id == SESSION_A["X-Session-Id"])).first()
+        assert user is not None
+        numeric_headers = {"X-User-Id": str(user.id)}
+    profile_resp = client.get("/api/profile", headers=numeric_headers)
+    history_resp = client.get("/api/history", headers=numeric_headers)
     assert profile_resp.status_code == 200
     assert profile_resp.json()["display_name"] == "Legacy"
     assert len(history_resp.json()) == 1
