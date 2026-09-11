@@ -29,29 +29,28 @@ def _get_or_create_anonymous_user(session_id: str, session: Session) -> User:
 
 def get_current_user(request: Request, session: Session = Depends(get_session)) -> User | SimpleNamespace:
     """
-    Extract user from JWT token in Authorization header: Bearer <token>
-    Falls back to header-based identity via X-Session-Id or numeric X-User-Id.
-    If no valid auth is found, returns an anonymous user object.
+    Resolve the current user from JWT auth, anonymous session headers, or legacy
+    numeric/string user-id headers.
+
+    An X-Session-Id header provisions a persisted anonymous User record on first
+    use. If no resolvable identity is present, returns an anonymous placeholder.
     """
-    
-    # Try JWT token first
+
     auth_header = request.headers.get("Authorization", "")
-    if auth_header.startswith("Bearer "):
-        token = auth_header[7:]  # Remove "Bearer " prefix
+    if auth_header.startswith("******"):
+        token = auth_header[7:]
         try:
             user_id = decode_token(token)
             user = session.get(User, user_id)
             if user:
                 return user
         except (ValueError, TypeError):
-            pass  # Fall through to headers/anonymous
-    
-    # Try anonymous session header
+            pass
+
     session_id = request.headers.get("X-Session-Id")
     if session_id:
         return _get_or_create_anonymous_user(session_id, session)
 
-    # Try numeric id header for backward compatibility
     user_id = request.headers.get("X-User-Id")
     if user_id:
         try:
@@ -59,11 +58,11 @@ def get_current_user(request: Request, session: Session = Depends(get_session)) 
             if user:
                 return user
         except (ValueError, TypeError):
-            pass
+            if user_id.startswith("user_"):
+                return _get_or_create_anonymous_user(user_id, session)
 
-    # Fallback anonymous user (has id and email attributes so routes expecting them won't crash)
     return SimpleNamespace(id=None, email=None)
-    
+
 
 def require_user(user: User | SimpleNamespace = Depends(get_current_user)) -> User | SimpleNamespace:
     """

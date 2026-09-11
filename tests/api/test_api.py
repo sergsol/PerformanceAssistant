@@ -122,3 +122,16 @@ def test_numeric_user_id_header_still_resolves_existing_user(client):
     assert profile_resp.status_code == 200
     assert profile_resp.json()["display_name"] == "Legacy"
     assert len(history_resp.json()) == 1
+
+
+def test_legacy_string_user_id_header_still_resolves_existing_user(client):
+    legacy_headers = {"X-User-Id": "user_legacy-session"}
+    client.put("/api/profile", json=_profile_payload("Legacy String"), headers=legacy_headers)
+    client.post(
+        "/api/assess",
+        json={"self_report": "I write tests and report bugs."},
+        headers=legacy_headers,
+    )
+    history_resp = client.get("/api/history", headers=legacy_headers)
+    assert history_resp.status_code == 200
+    assert len(history_resp.json()) == 1
