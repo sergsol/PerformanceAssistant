@@ -1,5 +1,6 @@
 from __future__ import annotations
 from fastapi import Depends, Request, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 from types import SimpleNamespace
 
@@ -14,8 +15,14 @@ def _get_or_create_anonymous_user(session_id: str, session: Session) -> User:
         return user
     user = User(session_id=session_id)
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    try:
+        session.commit()
+        session.refresh(user)
+    except IntegrityError:
+        session.rollback()
+        user = session.exec(select(User).where(User.session_id == session_id)).first()
+        if user is None:
+            raise
     return user
 
 

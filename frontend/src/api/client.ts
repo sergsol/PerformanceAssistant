@@ -11,7 +11,7 @@ export class ApiError extends Error {
 function getAnonymousSessionId(): string {
   let sessionId = localStorage.getItem(SESSION_STORAGE_KEY) ?? localStorage.getItem(LEGACY_USER_STORAGE_KEY)
   if (!sessionId) {
-    sessionId = 'session_' + Math.random().toString(36).slice(2, 11)
+    sessionId = `session_${crypto.randomUUID()}`
   }
   localStorage.setItem(SESSION_STORAGE_KEY, sessionId)
   localStorage.removeItem(LEGACY_USER_STORAGE_KEY)

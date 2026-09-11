@@ -60,6 +60,8 @@ def test_profile_is_created_and_read_by_anonymous_session(client):
 def test_profile_missing_for_new_session_returns_404(client):
     resp = client.get("/api/profile", headers=SESSION_A)
     assert resp.status_code == 404
+    repeat_resp = client.get("/api/profile", headers=SESSION_A)
+    assert repeat_resp.status_code == 404
 
 
 def test_assess_requires_profile_for_session(client):
@@ -97,3 +99,11 @@ def test_data_isolation_between_users(client):
     resp = client.get("/api/history", headers=SESSION_B)
     assert resp.status_code == 200
     assert resp.json() == []
+
+
+def test_legacy_user_id_header_still_resolves_session(client):
+    legacy_headers = {"X-User-Id": "legacy-session"}
+    client.put("/api/profile", json=_profile_payload("Legacy"), headers=legacy_headers)
+    resp = client.get("/api/profile", headers=legacy_headers)
+    assert resp.status_code == 200
+    assert resp.json()["display_name"] == "Legacy"
