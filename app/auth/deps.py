@@ -8,6 +8,17 @@ from app.db.models import User
 from app.auth.jwt import decode_token
 
 
+def _get_or_create_anonymous_user(session_id: str, session: Session) -> User:
+    user = session.exec(select(User).where(User.session_id == session_id)).first()
+    if user:
+        return user
+    user = User(session_id=session_id)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
 def get_current_user(request: Request, session: Session = Depends(get_session)) -> User | SimpleNamespace:
     """
     Extract user from JWT token in Authorization header: Bearer <token>
@@ -27,8 +38,13 @@ def get_current_user(request: Request, session: Session = Depends(get_session)) 
         except (ValueError, TypeError):
             pass  # Fall through to headers/anonymous
     
-    # Try numeric id header
-    user_id = request.headers.get("X-User-Id")
+    # Try anonymous session header
+    session_id = request.headers.get("X-Session-Id") or request.headers.get("X-User-Id")
+    if session_id:
+        return _get_or_create_anonymous_user(session_id, session)
+
+    # Try numeric id header for backward compatibility
+    user_id = request.headers.get("X-Db-User-Id")
     if user_id:
         try:
             user = session.get(User, int(user_id))

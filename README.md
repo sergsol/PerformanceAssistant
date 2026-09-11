@@ -26,7 +26,7 @@ whole point, and it's directly tested.
 
 - **Backend/API:** FastAPI (Python) — auto OpenAPI schema feeds the API tests
 - **Frontend:** Jinja2 + HTMX + Tailwind + Alpine.js (modern look, stays in Python)
-- **Auth:** session cookies + bcrypt
+- **Identity:** anonymous browser session ID persisted in localStorage and mapped to a backend user record
 - **DB:** SQLModel — **SQLite** locally & in tests, **Postgres** in production (one URL change)
 - **AI:** provider-agnostic wrapper; **Google Gemini Flash** (free tier) primary, Groq planned, stub for tests
 - **Tests:** pytest, Playwright, schemathesis, DeepEval + promptfoo (evals)
@@ -40,7 +40,7 @@ Browser (HTMX + Alpine + Tailwind)
    ▼
 FastAPI
    ├─ routes/  auth · profile · web · api
-   ├─ auth/    bcrypt + session dep (enforces data isolation)
+   ├─ auth/    request identity resolution (JWT legacy support + anonymous session dep)
    ├─ db/      SQLModel: User · Profile · Assessment
    ├─ rubric/  rubric.yaml (data) + loader
    ├─ schemas/ AssessRequest · AssessResult (the AI contract)
@@ -51,9 +51,9 @@ FastAPI
 Gemini API (free tier)
 ```
 
-Two assess endpoints on purpose: `POST /api/assess` returns JSON (for API tests
-and programmatic use); `POST /assess` returns an HTML fragment (the authenticated
-web flow that also persists history). Same `assessor` service underneath.
+`POST /api/assess` returns JSON for the SPA. The frontend persists an anonymous
+session ID in localStorage and sends it with each API request so profile and
+history stay isolated without login.
 
 ## Testing strategy (the point of the repo)
 

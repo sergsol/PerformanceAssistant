@@ -1,12 +1,29 @@
-"""API + auth + data-isolation tests. LLM is stubbed (see conftest)."""
+"""API tests for anonymous session profile, assess, and history flows."""
 from __future__ import annotations
 
 
+SESSION_A = {"X-Session-Id": "session-a"}
+SESSION_B = {"X-Session-Id": "session-b"}
+
+
+def _profile_payload(display_name: str = "Serge") -> dict[str, str]:
+    return {
+        "display_name": display_name,
+        "title": "Senior QA Engineer",
+        "level": "Senior",
+        "scorecard_role": "senior_qa",
+        "company": "Digital Turbine",
+        "tech_context": "ad-tech",
+    }
+
+
 def test_api_assess_returns_valid_result(client):
-    resp = client.post("/api/assess", json={
-        "title": "Senior QA Engineer", "level": "Senior",
-        "self_report": "I write automated tests and report bugs.",
-    })
+    client.put("/api/profile", json=_profile_payload(), headers=SESSION_A)
+    resp = client.post(
+        "/api/assess",
+        json={"self_report": "I write automated tests and report bugs."},
+        headers=SESSION_A,
+    )
     assert resp.status_code == 200
     body = resp.json()
     assert body["overall_band"] in {"Below", "Meets", "Exceeds"}
@@ -15,64 +32,68 @@ def test_api_assess_returns_valid_result(client):
 
 def test_core_judgment_execution_only_is_not_exceeds(client):
     """The whole point: tests + bugs alone must never read as Exceeds."""
-    resp = client.post("/api/assess", json={
-        "title": "Senior QA Engineer", "level": "Senior",
-        "self_report": "I write tests and report bugs.",
-    })
+    client.put("/api/profile", json=_profile_payload(), headers=SESSION_A)
+    resp = client.post(
+        "/api/assess",
+        json={"self_report": "I write tests and report bugs."},
+        headers=SESSION_A,
+    )
     body = resp.json()
     assert body["overall_band"] != "Exceeds"
     assert body["trending"] == "Below"
 
 
 def test_empty_self_report_rejected(client):
-    resp = client.post("/api/assess", json={
-        "title": "Senior QA Engineer", "level": "Senior", "self_report": "",
-    })
+    client.put("/api/profile", json=_profile_payload(), headers=SESSION_A)
+    resp = client.post("/api/assess", json={"self_report": ""}, headers=SESSION_A)
     assert resp.status_code == 422
 
 
-def test_home_requires_login(client):
-    resp = client.get("/", follow_redirects=False)
-    assert resp.status_code in (303, 307)
-    assert "/login" in resp.headers["location"]
+def test_profile_is_created_and_read_by_anonymous_session(client):
+    put_resp = client.put("/api/profile", json=_profile_payload(), headers=SESSION_A)
+    assert put_resp.status_code == 200
+    get_resp = client.get("/api/profile", headers=SESSION_A)
+    assert get_resp.status_code == 200
+    assert get_resp.json()["display_name"] == "Serge"
 
 
-def test_wrong_password_rejected(client):
-    client.post("/register", data={"email": "u@x.com", "password": "right"},
-                follow_redirects=False)
-    client.post("/logout", follow_redirects=False)
-    resp = client.post("/login", data={"email": "u@x.com", "password": "wrong"})
-    assert resp.status_code == 401
+def test_profile_missing_for_new_session_returns_404(client):
+    resp = client.get("/api/profile", headers=SESSION_A)
+    assert resp.status_code == 404
 
 
-def test_duplicate_registration_conflicts(client):
-    client.post("/register", data={"email": "dup@x.com", "password": "pw"},
-                follow_redirects=False)
-    resp = client.post("/register", data={"email": "dup@x.com", "password": "pw"})
-    assert resp.status_code == 409
+def test_assess_requires_profile_for_session(client):
+    resp = client.post(
+        "/api/assess",
+        json={"self_report": "I write tests and report bugs."},
+        headers=SESSION_A,
+    )
+    assert resp.status_code == 400
+    assert resp.json()["detail"] == "Complete your profile before assessing"
 
 
-def test_history_persists_after_assess(registered_client):
-    registered_client.post("/assess", data={"self_report": "I write tests and report bugs."})
-    resp = registered_client.get("/history")
+def test_history_persists_for_anonymous_session(client):
+    client.put("/api/profile", json=_profile_payload(), headers=SESSION_A)
+    client.post(
+        "/api/assess",
+        json={"self_report": "I write tests and report bugs."},
+        headers=SESSION_A,
+    )
+    resp = client.get("/api/history", headers=SESSION_A)
     assert resp.status_code == 200
-    assert "trending" in resp.text.lower() or "Meets" in resp.text
+    body = resp.json()
+    assert len(body) == 1
+    assert body[0]["self_report"] == "I write tests and report bugs."
 
 
 def test_data_isolation_between_users(client):
-    # User A registers, sets profile, creates an assessment.
-    client.post("/register", data={"email": "a@x.com", "password": "pw"}, follow_redirects=False)
-    client.post("/profile", data={"display_name": "A", "title": "Senior QA Engineer",
-                                  "level": "Senior", "company": "", "tech_context": ""},
-                follow_redirects=False)
-    client.post("/assess", data={"self_report": "I write tests and report bugs."})
-    client.post("/logout", follow_redirects=False)
-
-    # User B registers fresh; their history must be empty (cannot see A's).
-    client.post("/register", data={"email": "b@x.com", "password": "pw"}, follow_redirects=False)
-    client.post("/profile", data={"display_name": "B", "title": "Senior QA Engineer",
-                                  "level": "Senior", "company": "", "tech_context": ""},
-                follow_redirects=False)
-    resp = client.get("/history")
+    client.put("/api/profile", json=_profile_payload("A"), headers=SESSION_A)
+    client.post(
+        "/api/assess",
+        json={"self_report": "I write tests and report bugs."},
+        headers=SESSION_A,
+    )
+    client.put("/api/profile", json=_profile_payload("B"), headers=SESSION_B)
+    resp = client.get("/api/history", headers=SESSION_B)
     assert resp.status_code == 200
-    assert "No assessments yet" in resp.text
+    assert resp.json() == []

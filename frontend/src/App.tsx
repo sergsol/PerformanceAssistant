@@ -1,6 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Login from './pages/Login'
-import Register from './pages/Register'
 import Profile from './pages/Profile'
 import Assess from './pages/Assess'
 import History from './pages/History'
@@ -12,8 +10,6 @@ export default function App() {
     <ProfileProvider initialComplete={false}>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Assess />} />
             <Route path="/profile" element={<Profile />} />

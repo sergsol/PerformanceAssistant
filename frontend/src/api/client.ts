@@ -1,4 +1,6 @@
 const BASE = import.meta.env.VITE_API_URL ?? ''
+const SESSION_STORAGE_KEY = 'anonymous_session_id'
+const LEGACY_USER_STORAGE_KEY = 'anonymous_user_id'
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -6,23 +8,22 @@ export class ApiError extends Error {
   }
 }
 
-// Generate or retrieve anonymous user ID
-function getAnonymousUserId(): string {
-  let userId = localStorage.getItem('anonymous_user_id')
-  if (!userId) {
-    userId = 'user_' + Math.random().toString(36).substr(2, 9)
-    localStorage.setItem('anonymous_user_id', userId)
+function getAnonymousSessionId(): string {
+  let sessionId = localStorage.getItem(SESSION_STORAGE_KEY) ?? localStorage.getItem(LEGACY_USER_STORAGE_KEY)
+  if (!sessionId) {
+    sessionId = 'session_' + Math.random().toString(36).slice(2, 11)
   }
-  return userId
+  localStorage.setItem(SESSION_STORAGE_KEY, sessionId)
+  localStorage.removeItem(LEGACY_USER_STORAGE_KEY)
+  return sessionId
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'X-User-Id': getAnonymousUserId(),
+    'X-Session-Id': getAnonymousSessionId(),
     ...(options.headers as Record<string, string>),
   }
-  // Anonymous mode - no token authentication needed
   const res = await fetch(`${BASE}${path}`, { ...options, headers })
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }))
