@@ -27,24 +27,17 @@ dev = [
     "schemathesis>=3.38",
     "deepeval>=1.5",
     "ruff>=0.7",
+    "requests>=2.31",
 ]
-
-[tool.ruff]
-line-length = 100
-target-version = "py312"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-# UI tests need a running server / browser; keep them opt-in in CI stages
 markers = [
     "ui: end-to-end Playwright tests (require browser)",
     "evals: AI eval tests (require live LLM API key)",
 ]
 
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = ["app"]
+[tool.ruff]
+line-length = 100
+target-version = "py312"
