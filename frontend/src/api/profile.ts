@@ -1,4 +1,5 @@
-import { apiFetch } from './client'
+import { fetchWithRetry, ApiError } from './client'
 import type { Profile } from '../types'
-export const getProfile = () => apiFetch<Profile>('/api/profile')
-export const updateProfile = (data: Profile) => apiFetch<Profile>('/api/profile', { method: 'PUT', body: JSON.stringify(data) })
+export const getProfile = () => fetchWithRetry<Profile>('/api/profile')
+export const updateProfile = (data: Profile) =>
+  fetchWithRetry<Profile>('/api/profile', { method: 'PUT', body: JSON.stringify(data) })
