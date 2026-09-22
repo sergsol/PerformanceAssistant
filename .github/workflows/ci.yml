@@ -20,8 +20,6 @@ concurrency:
 
 env:
   PYTHON_VERSION: "3.12"
-  PIP_NO_CACHE_DIR: "1"
-  PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
 jobs:
   lint:
@@ -39,7 +37,7 @@ jobs:
         run: pip install ".[dev]"
 
       - name: Ruff check
-        run: ruff check app/ tests/
+        run: pip install -e ".[dev]" && ruff check app/ tests/
 
       - name: Ruff format (check only)
         run: ruff format --check app/ tests/
