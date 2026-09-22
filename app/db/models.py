@@ -22,6 +22,9 @@ class User(SQLModel, table=True):
 
     profile: Optional["Profile"] = Relationship(back_populates="user")
     assessments: List["Assessment"] = Relationship(back_populates="user")
+    refresh_tokens: List["RefreshToken"] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"cascade": "delete"}
+    )
 
 
 class Profile(SQLModel, table=True):
@@ -46,3 +49,20 @@ class Assessment(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_utcnow)
 
     user: Optional[User] = Relationship(back_populates="assessments")
+
+
+class RefreshToken(SQLModel, table=True):
+    """Server-side refresh tokens. Enables true logout + token revocation.
+
+    Each login/issue issues one refresh token. Revoking it invalidates the
+    ability to get new access tokens — i.e. real logout from all devices
+    that used that token.
+    """
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    token_hash: str = Field(index=True, unique=True)  # hashed for storage
+    expires_at: datetime
+    revoked: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=_utcnow)
+
+    user: Optional[User] = Relationship(back_populates="refresh_tokens")

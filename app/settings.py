@@ -13,8 +13,12 @@ class Settings(BaseSettings):
 
     # --- Core ---
     app_name: str = "Performance Assistant"
-    secret_key: str = "dev-only-change-me"  # signs session cookies; override in prod
+    secret_key: str = "dev-only-change-me"  # signs JWTs + sessions; MUST be overridden in prod
     debug: bool = True
+
+    # --- Auth lifetimes ---
+    access_token_ttl_minutes: int = 15        # short-lived access token (JWT)
+    refresh_token_ttl_days: int = 30          # longer-lived refresh token (server-side, revocable)
 
     # --- Database ---
     # Local/dev/test default is SQLite. In production set DATABASE_URL to the
