@@ -1,17 +1,16 @@
 """Refresh token handling: creation, hashing, verification, revocation."""
 
 from __future__ import annotations
-from datetime import datetime, timedelta, timezone
+
+import hashlib
+import secrets
+from datetime import UTC, datetime, timedelta
 
 from sqlmodel import Session, select
 
 from app.db.models import RefreshToken
 from app.db.session import engine
 from app.settings import get_settings
-
-import hashlib
-import secrets
-from typing import Optional
 
 
 def _hash_token(raw: str) -> str:
@@ -34,7 +33,7 @@ def store_refresh_token(user_id: int, raw_token: str) -> RefreshToken:
         rt = RefreshToken(
             user_id=user_id,
             token_hash=_hash_token(raw_token),
-            expires_at=datetime.now(timezone.utc) + timedelta(days=ttl),
+            expires_at=datetime.now(UTC) + timedelta(days=ttl),
         )
         session.add(rt)
         session.commit()
@@ -42,7 +41,7 @@ def store_refresh_token(user_id: int, raw_token: str) -> RefreshToken:
         return rt
 
 
-def verify_refresh_token(raw_token: str) -> Optional[RefreshToken]:
+def verify_refresh_token(raw_token: str) -> RefreshToken | None:
     """Look up a refresh token by its hash. Returns the model or None."""
     hash_value = _hash_token(raw_token)
     with Session(engine) as session:

@@ -1,10 +1,14 @@
 from __future__ import annotations
+
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.db.session import init_db
-from app.routes import api, api_auth, api_profile, api_history
+from app.routes import api, api_auth, api_history, api_profile
 from app.settings import get_settings
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

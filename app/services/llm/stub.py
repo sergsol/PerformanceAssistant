@@ -26,9 +26,9 @@ class StubClient:
             return "Meets" if present else "Below"
 
         result = {
-            "overall_band": "Meets" if (has_strategy and has_influence) else "Meets",
+            "overall_band": "Meets",
             "overall_summary": "Stubbed assessment for testing.",
-            "trending": None if (has_strategy and has_influence) else "Below",
+            "trending": "Below",
             "dimensions": [
                 {"dimension": "Technical execution & automation", "band": "Meets",
                  "evidence": ["writes tests"], "gap": "Improve the framework itself."},

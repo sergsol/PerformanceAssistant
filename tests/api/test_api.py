@@ -33,9 +33,9 @@ def test_empty_self_report_rejected(registered_client):
 
 
 def test_home_requires_login(client):
-    resp = client.get("/", follow_redirects=False)
-    assert resp.status_code in (303, 307)
-    assert "/login" in resp.headers["location"]
+    resp = client.get("/api/profile", follow_redirects=False)
+    assert resp.status_code == 401
+    assert resp.json()["detail"] == "Login required"
 
 
 def test_wrong_password_rejected(client):
@@ -45,7 +45,7 @@ def test_wrong_password_rejected(client):
     )
     resp = client.post(
         "/api/auth/login",
-        json={"email": "u@x.com", "password": "wrong"},
+        json={"email": "u@x.com", "password": "wrongpassword"},
     )
     assert resp.status_code == 401
 

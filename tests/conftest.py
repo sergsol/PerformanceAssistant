@@ -63,7 +63,7 @@ def registered_client(client):
     access_token = resp.json()["access_token"]
     client.headers["Authorization"] = f"Bearer {access_token}"
 
-    client.post(
+    client.put(
         "/api/profile",
         json={
             "display_name": "Serge",

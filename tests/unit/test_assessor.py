@@ -5,9 +5,9 @@ import json
 
 import pytest
 
-from app.scorecard.loader import dimension_names, load_scorecard
 from app.schemas.request import AssessRequest
 from app.schemas.result import AssessResult, Band
+from app.scorecard.loader import dimension_names, load_scorecard
 from app.services.assessor import build_prompt, parse_result
 
 
@@ -45,5 +45,5 @@ def test_parse_result_strips_markdown_fences():
 def test_parse_result_rejects_bad_band():
     bad = json.dumps({"overall_band": "Amazing", "overall_summary": "x",
                       "dimensions": [], "recommendations": []})
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         parse_result(bad)

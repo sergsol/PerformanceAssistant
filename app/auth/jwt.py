@@ -1,6 +1,9 @@
 from __future__ import annotations
-from datetime import datetime, timedelta, timezone
+
+from datetime import UTC, datetime, timedelta
+
 from jose import JWTError, jwt
+
 from app.settings import Settings, get_settings
 
 ALGORITHM = "HS256"
@@ -14,7 +17,7 @@ def create_access_token(user_id: int) -> str:
     """Short-lived JWT access token (~15 min). Carries user_id, expires quickly."""
     s = _s()
     ttl = timedelta(minutes=s.access_token_ttl_minutes)
-    exp = datetime.now(timezone.utc) + ttl
+    exp = datetime.now(UTC) + ttl
     return jwt.encode(
         {"sub": str(user_id), "exp": exp, "type": "access"},
         s.secret_key,
@@ -51,4 +54,4 @@ def decode_access_token(token: str) -> int:
 def access_token_expiry() -> datetime:
     """When the current access token expires (for the client to know when to refresh)."""
     s = _s()
-    return datetime.now(timezone.utc) + timedelta(minutes=s.access_token_ttl_minutes)
+    return datetime.now(UTC) + timedelta(minutes=s.access_token_ttl_minutes)

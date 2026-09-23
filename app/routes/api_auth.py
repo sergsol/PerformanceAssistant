@@ -1,18 +1,23 @@
 from __future__ import annotations
-from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import HTTPBearer
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
+
 from app.auth.jwt import create_access_token
-from app.auth.security import hash_password, verify_password
 from app.auth.refresh import (
     create_refresh_token as make_refresh,
+)
+from app.auth.refresh import (
+    revoke_refresh_token,
     store_refresh_token,
     verify_refresh_token,
-    revoke_refresh_token,
 )
-from app.db.models import RefreshToken, User
+from app.auth.security import hash_password, verify_password
+from app.db.models import User
 from app.db.session import get_session
 from app.settings import get_settings
 
@@ -92,7 +97,7 @@ def refresh(body: RefreshRequest):
     This limits the window of exposure if a refresh token is leaked.
     """
     rt = verify_refresh_token(body.refresh_token)
-    if rt is None or rt.revoked or rt.expires_at <= datetime.now(timezone.utc):
+    if rt is None or rt.revoked or rt.expires_at <= datetime.now(UTC):
         raise HTTPException(status_code=401, detail="Refresh token invalid or expired")
 
     uid = rt.user_id

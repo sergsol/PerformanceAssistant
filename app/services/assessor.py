@@ -11,9 +11,9 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from app.scorecard.loader import load_scorecard
 from app.schemas.request import AssessRequest
 from app.schemas.result import AssessResult
+from app.scorecard.loader import load_scorecard
 from app.services.llm.base import LLMClient
 
 _SYSTEM = """You are a calibrated performance-review assistant.

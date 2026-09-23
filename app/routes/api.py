@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
+
 from app.auth.deps import require_user
 from app.db.models import Assessment, Profile, User
 from app.db.session import get_session
