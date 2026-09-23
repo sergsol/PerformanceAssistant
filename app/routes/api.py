@@ -44,7 +44,7 @@ def api_assess(
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=502, detail=f"LLM error {exc.response.status_code}: {exc.response.text[:300]}")
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from None
 
     session.add(Assessment(
         user_id=user.id,

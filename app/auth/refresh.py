@@ -68,14 +68,14 @@ def revoke_all_user_tokens(user_id: int) -> int:
     with Session(engine) as session:
         stmt = select(RefreshToken).where(
             RefreshToken.user_id == user_id,
-            RefreshToken.revoked == False,
+            not RefreshToken.revoked,
         )
         count = session.exec(stmt).unique().count()
         update_stmt = (
             RefreshToken.update()
             .where(
                 RefreshToken.user_id == user_id,
-                RefreshToken.revoked == False,
+                not RefreshToken.revoked,
             )
             .values({"revoked": True})
         )
