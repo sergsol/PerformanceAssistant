@@ -28,8 +28,8 @@ class ProfileIn(BaseModel):
 
 @router.get("/profile", response_model=ProfileOut)
 def get_profile(
-    user: User = Depends(require_user),  # noqa: B008
-    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(require_user),
+    session: Session = Depends(get_session),
 ) -> ProfileOut:
     profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if not profile:
@@ -38,9 +38,9 @@ def get_profile(
 
 @router.put("/profile", response_model=ProfileOut)
 def update_profile(
-    body: ProfileIn,  # noqa: B008
-    user: User = Depends(require_user),  # noqa: B008
-    session: Session = Depends(get_session),  # noqa: B008
+    body: ProfileIn,
+    user: User = Depends(require_user),
+    session: Session = Depends(get_session),
 ) -> ProfileOut:
     profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if not profile:
