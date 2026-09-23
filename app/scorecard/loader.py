@@ -1,5 +1,6 @@
 """Load scorecards from scorecard.yaml. Scorecards are data, not code, so new
 roles/levels can be added without touching Python."""
+
 from __future__ import annotations
 
 from functools import lru_cache

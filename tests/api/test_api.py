@@ -1,4 +1,5 @@
 """API + auth + data-isolation tests. LLM is stubbed (see conftest)."""
+
 from __future__ import annotations
 
 

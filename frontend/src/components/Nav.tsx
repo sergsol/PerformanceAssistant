@@ -30,7 +30,7 @@ export default function Nav() {
             </Link>
           )
         })}
-        <button onClick={() => { logout(); navigate('/login') }}
+        <button onClick={async () => { await logout(); navigate('/login') }}
           className="ml-auto text-slate-500 hover:text-slate-900">Log out</button>
       </div>
     </nav>

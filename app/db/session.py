@@ -1,6 +1,7 @@
 """Engine + session management. The URL comes from settings, so tests use
 SQLite and production uses Postgres with no code change.
 """
+
 from __future__ import annotations
 
 from collections.abc import Iterator

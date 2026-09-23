@@ -28,6 +28,7 @@ _bearer = HTTPBearer()
 
 # ── Request/Response models ──────────────────────────────────────────
 
+
 class AuthRequest(BaseModel):
     email: str = Field(min_length=1, max_length=254)
     password: str = Field(min_length=8)
@@ -36,8 +37,8 @@ class AuthRequest(BaseModel):
 class TokenPairResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    expires_in: int                    # seconds until access token expires
-    refresh_token: str                # opaque, store client-side for refresh
+    expires_in: int  # seconds until access token expires
+    refresh_token: str  # opaque, store client-side for refresh
 
 
 class RefreshRequest(BaseModel):
@@ -45,6 +46,7 @@ class RefreshRequest(BaseModel):
 
 
 # ── Auth endpoints ───────────────────────────────────────────────────
+
 
 @router.post("/register", response_model=TokenPairResponse, status_code=201)
 def register(body: AuthRequest, session: Session = Depends(get_session)):
@@ -59,7 +61,7 @@ def register(body: AuthRequest, session: Session = Depends(get_session)):
     assert uid is not None
 
     raw_refresh = make_refresh(uid)
-    store_refresh_token(uid, raw_refresh)   # commits internally
+    store_refresh_token(uid, raw_refresh)  # commits internally
 
     access = create_access_token(uid)
     return TokenPairResponse(
@@ -79,7 +81,7 @@ def login(body: AuthRequest, session: Session = Depends(get_session)):
     assert uid is not None
 
     raw_refresh = make_refresh(uid)
-    store_refresh_token(uid, raw_refresh)   # commits internally
+    store_refresh_token(uid, raw_refresh)  # commits internally
 
     access = create_access_token(uid)
     return TokenPairResponse(
@@ -105,7 +107,7 @@ def refresh(body: RefreshRequest):
     revoke_refresh_token(body.refresh_token)
 
     new_refresh = make_refresh(uid)
-    store_refresh_token(uid, new_refresh)   # commits internally
+    store_refresh_token(uid, new_refresh)  # commits internally
 
     access = create_access_token(uid)
     return TokenPairResponse(

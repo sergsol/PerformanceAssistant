@@ -33,6 +33,7 @@ def create_refresh_token(user_id: int) -> str:
     a hash of it in the RefreshToken table.
     """
     import secrets
+
     return secrets.token_urlsafe(48)
 
 

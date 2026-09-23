@@ -6,6 +6,7 @@ Run locally:
     playwright install chromium
     pytest -m ui --base-url http://localhost:8000
 """
+
 from __future__ import annotations
 
 import pytest
@@ -38,12 +39,12 @@ def registered_user(browser):
 
     if "/profile" in page.url:
         page.fill("input[name=display_name]", "UI Tester")
-        page.fill("input[name=title]", "Senior QA Engineer")
-        page.fill("input[name=level]", "Senior")
+        page.select_option("select[name=role]", "qa")
+        page.select_option("select[name=level]", "senior_qa")
         page.fill("input[name=company]", "Acme")
         page.fill("input[name=tech_context]", "Python API testing")
         page.click("button:has-text('Save profile')")
-        page.wait_for_url(f"{BASE}/")
+        page.wait_for_url(f"{BASE}/", wait_until="commit")
 
     ctx.close()
     yield EMAIL, PASSWORD
@@ -52,14 +53,15 @@ def registered_user(browser):
     db_path = Path(__file__).parent.parent.parent / "perfreviewbot.db"
     if db_path.exists():
         conn = sqlite3.connect(str(db_path))
-        conn.execute("DELETE FROM assessment WHERE user_id IN "
-                     "(SELECT id FROM user WHERE email IN (?, ?))",
-                     (EMAIL, "ui_isolation@example.com"))
-        conn.execute("DELETE FROM profile WHERE user_id IN "
-                     "(SELECT id FROM user WHERE email IN (?, ?))",
-                     (EMAIL, "ui_isolation@example.com"))
-        conn.execute("DELETE FROM user WHERE email IN (?, ?)",
-                     (EMAIL, "ui_isolation@example.com"))
+        conn.execute(
+            "DELETE FROM assessment WHERE user_id IN (SELECT id FROM user WHERE email IN (?, ?))",
+            (EMAIL, "ui_isolation@example.com"),
+        )
+        conn.execute(
+            "DELETE FROM profile WHERE user_id IN (SELECT id FROM user WHERE email IN (?, ?))",
+            (EMAIL, "ui_isolation@example.com"),
+        )
+        conn.execute("DELETE FROM user WHERE email IN (?, ?)", (EMAIL, "ui_isolation@example.com"))
         conn.commit()
         conn.close()
 
@@ -70,24 +72,25 @@ def _login(page, email: str = EMAIL, password: str = PASSWORD):
     page.fill("input[name=email]", email)
     page.fill("input[name=password]", password)
     page.click("button:has-text('Log in')")
-    page.wait_for_url(f"{BASE}/")
+    page.wait_for_url(f"{BASE}/", wait_until="commit")
 
 
 def test_register_and_login(registered_user, page):
     """Log out then log back in — auth round-trip works."""
     _login(page)
     page.click("button:has-text('Log out')")
-    page.wait_for_url(f"{BASE}/login")
+    page.wait_for_url(f"{BASE}/login", wait_until="commit")
 
     _login(page)
-    assert "New assessment" in page.inner_text("body")
+    page.wait_for_selector("textarea[name=self_report]")
+    assert "Get assessment" in page.inner_text("body")
 
 
 def test_assessment_renders_result(registered_user, page):
     """Submit a self-report and verify the verdict renders."""
     _login(page)
     page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Assess')")
+    page.click("button:has-text('Get assessment')")
     page.wait_for_selector("text=Overall verdict")
 
     text = page.inner_text("body")
@@ -100,7 +103,7 @@ def test_result_shows_all_six_dimensions(registered_user, page):
     """Every scorecard dimension must appear in the rendered result."""
     _login(page)
     page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Assess')")
+    page.click("button:has-text('Get assessment')")
     page.wait_for_selector("text=Overall verdict")
 
     text = page.inner_text("body")
@@ -119,10 +122,11 @@ def test_history_records_assessment(registered_user, page):
     """After an assessment the history page shows a result."""
     _login(page)
     page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Assess')")
+    page.click("button:has-text('Get assessment')")
     page.wait_for_selector("text=Overall verdict")
 
     page.goto(f"{BASE}/history")
+    page.wait_for_selector("text=Loading…", state="detached")
     text = page.inner_text("body")
     assert "Meets" in text
     assert "No assessments yet" not in text
@@ -132,7 +136,7 @@ def test_data_isolation_ui(registered_user, page, browser):
     """User B cannot see user A's history."""
     _login(page)
     page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Assess')")
+    page.click("button:has-text('Get assessment')")
     page.wait_for_selector("text=Overall verdict")
 
     # Fresh context = fresh session cookie → User B
@@ -140,13 +144,16 @@ def test_data_isolation_ui(registered_user, page, browser):
     page_b = ctx_b.new_page()
     page_b.goto(f"{BASE}/register")
     page_b.fill("input[name=email]", "ui_isolation@example.com")
-    page_b.fill("input[name=password]", "pw2")
+    page_b.fill("input[name=password]", "pw2testpass")
     page_b.click("button:has-text('Register')")
-    page_b.wait_for_url(f"{BASE}/profile")
+    page_b.wait_for_url(f"{BASE}/profile", wait_until="commit")
     page_b.fill("input[name=display_name]", "Other")
+    page_b.select_option("select[name=role]", "qa")
+    page_b.select_option("select[name=level]", "senior_qa")
     page_b.click("button:has-text('Save profile')")
-    page_b.wait_for_url(f"{BASE}/")
+    page_b.wait_for_url(f"{BASE}/", wait_until="commit")
 
     page_b.goto(f"{BASE}/history")
+    page_b.wait_for_selector("text=Loading…", state="detached")
     assert "No assessments yet" in page_b.inner_text("body")
     ctx_b.close()

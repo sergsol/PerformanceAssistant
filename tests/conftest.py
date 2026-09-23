@@ -1,6 +1,7 @@
 """Shared fixtures. Tests run against SQLite with a stubbed LLM for speed and
 determinism. Live-model behavior is validated separately in evals/.
 """
+
 from __future__ import annotations
 
 import os
@@ -18,7 +19,17 @@ from app.main import create_app
 
 
 @pytest.fixture(autouse=True)
-def fresh_db():
+def fresh_db(request: pytest.FixtureRequest):
+    """Reset the schema between tests — except for UI tests.
+
+    UI tests drive a separately-running `uvicorn` process (started by CI/local
+    setup) that owns the database for the whole session; wiping tables from
+    this process out from under it would delete data the live server just
+    wrote (e.g. the registered test user), causing spurious 401s/500s.
+    """
+    if request.node.get_closest_marker("ui"):
+        yield
+        return
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     yield

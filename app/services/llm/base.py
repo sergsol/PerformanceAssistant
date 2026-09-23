@@ -3,6 +3,7 @@
 Everything downstream depends on this Protocol, not on a specific vendor SDK.
 Swapping Gemini <-> Groq <-> a test stub is a one-line factory change.
 """
+
 from __future__ import annotations
 
 from typing import Protocol

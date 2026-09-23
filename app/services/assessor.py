@@ -6,6 +6,7 @@ The prompt builder and parser are pure functions so they can be unit-tested
 without any network (Phase 3 tests). The LLM call is injected via the LLMClient
 interface so tests can pass a stub.
 """
+
 from __future__ import annotations
 
 import json
@@ -54,7 +55,8 @@ def build_prompt(req: AssessRequest, role: str = "senior_qa") -> tuple[str, str]
     """Return (system, user) prompt strings."""
     scorecard = load_scorecard(role)
     dims = "\n".join(
-        f"- {d['name']}\n    Below: {d['below']}\n    Meets: {d['meets']}\n    Exceeds: {d['exceeds']}"
+        f"- {d['name']}\n"
+        f"    Below: {d['below']}\n    Meets: {d['meets']}\n    Exceeds: {d['exceeds']}"
         for d in scorecard["dimensions"]
     )
     schema_hint = {
@@ -62,8 +64,12 @@ def build_prompt(req: AssessRequest, role: str = "senior_qa") -> tuple[str, str]
         "overall_summary": "string",
         "trending": "Below|null",
         "dimensions": [
-            {"dimension": "string", "band": "Below|Meets|Exceeds",
-             "evidence": ["string"], "gap": "string|null"}
+            {
+                "dimension": "string",
+                "band": "Below|Meets|Exceeds",
+                "evidence": ["string"],
+                "gap": "string|null",
+            }
         ],
         "recommendations": ["string"],
     }
@@ -73,11 +79,11 @@ def build_prompt(req: AssessRequest, role: str = "senior_qa") -> tuple[str, str]
   Company: {req.company or "n/a"}
   Tech context: {req.tech_context or "n/a"}
 
-SCORECARD ({scorecard['role']} / {scorecard['level']})
+SCORECARD ({scorecard["role"]} / {scorecard["level"]})
 {dims}
 
 AGGREGATION GUIDANCE
-{json.dumps(scorecard['aggregation'], indent=2)}
+{json.dumps(scorecard["aggregation"], indent=2)}
 
 WHAT THE PERSON DID THIS CYCLE
 {req.self_report}
@@ -120,8 +126,9 @@ def parse_result(raw: str) -> AssessResult:
     return AssessResult.model_validate(data)
 
 
-def assess(req: AssessRequest, client: LLMClient, role: str = "senior_qa",
-           temperature: float = 0.2) -> AssessResult:
+def assess(
+    req: AssessRequest, client: LLMClient, role: str = "senior_qa", temperature: float = 0.2
+) -> AssessResult:
     system, user = build_prompt(req, role)
     raw = client.complete_json(system, user, temperature=temperature)
     return parse_result(raw)

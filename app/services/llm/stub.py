@@ -6,6 +6,7 @@ tests / reporting bugs, it returns Meets-trending-Below. This lets UI/API tests
 assert on a stable result without hitting a real model. Real judgment quality is
 tested separately in evals/ against a live model.
 """
+
 from __future__ import annotations
 
 import json
@@ -18,9 +19,13 @@ class StubClient:
         marker = "WHAT THE PERSON DID THIS CYCLE"
         report_section = user.split(marker, 1)[1] if marker in user else user
         text = report_section.lower()
-        execution_only = any(k in text for k in ["write test", "writing test", "report bug", "reporting bug"])
+        execution_only = any(
+            k in text for k in ["write test", "writing test", "report bug", "reporting bug"]
+        )
         has_strategy = any(k in text for k in ["strategy", "own the", "prevent", "risk-based"])
-        has_influence = any(k in text for k in ["mentor", "stakeholder", "present", "influence", "cross-team"])
+        has_influence = any(
+            k in text for k in ["mentor", "stakeholder", "present", "influence", "cross-team"]
+        )
 
         def band(present: bool) -> str:
             return "Meets" if present else "Below"
@@ -30,16 +35,37 @@ class StubClient:
             "overall_summary": "Stubbed assessment for testing.",
             "trending": "Below",
             "dimensions": [
-                {"dimension": "Technical execution & automation", "band": "Meets",
-                 "evidence": ["writes tests"], "gap": "Improve the framework itself."},
-                {"dimension": "Test strategy & quality ownership", "band": band(has_strategy),
-                 "evidence": [], "gap": "Own strategy for a feature."},
+                {
+                    "dimension": "Technical execution & automation",
+                    "band": "Meets",
+                    "evidence": ["writes tests"],
+                    "gap": "Improve the framework itself.",
+                },
+                {
+                    "dimension": "Test strategy & quality ownership",
+                    "band": band(has_strategy),
+                    "evidence": [],
+                    "gap": "Own strategy for a feature.",
+                },
                 {"dimension": "Autonomy & scope", "band": "Meets", "evidence": [], "gap": None},
-                {"dimension": "Influence & collaboration", "band": band(has_influence),
-                 "evidence": [], "gap": "Present quality metrics to stakeholders."},
-                {"dimension": "Mentorship", "band": band(has_influence),
-                 "evidence": [], "gap": "Mentor a junior tester."},
-                {"dimension": "Business & risk impact", "band": "Meets", "evidence": [], "gap": None},
+                {
+                    "dimension": "Influence & collaboration",
+                    "band": band(has_influence),
+                    "evidence": [],
+                    "gap": "Present quality metrics to stakeholders.",
+                },
+                {
+                    "dimension": "Mentorship",
+                    "band": band(has_influence),
+                    "evidence": [],
+                    "gap": "Mentor a junior tester.",
+                },
+                {
+                    "dimension": "Business & risk impact",
+                    "band": "Meets",
+                    "evidence": [],
+                    "gap": None,
+                },
             ],
             "recommendations": [
                 "Own the test strategy for one feature end to end.",

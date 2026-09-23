@@ -1,4 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Nav from '../components/Nav'
 import { getProfile, updateProfile } from '../api/profile'
 import { ApiError } from '../api/client'
@@ -52,6 +53,7 @@ function roleFromKey(key: string): { role: string; level: RoleLevel } | null {
 }
 
 export default function Profile() {
+  const navigate = useNavigate()
   const [form, setForm] = useState<ProfileType>({
     display_name: '', title: '', level: '',
     scorecard_role: '', company: null, tech_context: null,
@@ -91,7 +93,11 @@ export default function Profile() {
     try {
       await updateProfile(form)
       setSaved(true)
+      const wasIncomplete = !profileComplete
       markProfileComplete()
+      // First-time setup: take the user straight to the assessment page.
+      // Later edits keep them on the profile page with a "saved" confirmation.
+      if (wasIncomplete) navigate('/')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong')
     } finally { setLoading(false) }
@@ -113,20 +119,20 @@ export default function Profile() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className={labelCls}>Display name</label>
-            <input value={form.display_name} onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
+            <input name="display_name" value={form.display_name} onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
               placeholder="Your name" required className={inputCls} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Role</label>
-              <select value={selectedRole} onChange={e => handleRoleChange(e.target.value)} required className={inputCls}>
+              <select name="role" value={selectedRole} onChange={e => handleRoleChange(e.target.value)} required className={inputCls}>
                 <option value="" disabled>— Select role —</option>
                 {Object.entries(ROLES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
             <div>
               <label className={labelCls}>Level</label>
-              <select value={selectedLevelKey} onChange={e => handleLevelChange(e.target.value)} required disabled={!selectedRole} className={inputCls}>
+              <select name="level" value={selectedLevelKey} onChange={e => handleLevelChange(e.target.value)} required disabled={!selectedRole} className={inputCls}>
                 <option value="" disabled>— Select level —</option>
                 {selectedRole && ROLES[selectedRole].levels.map(l => <option key={l.key} value={l.key}>{l.label}</option>)}
               </select>
@@ -134,17 +140,17 @@ export default function Profile() {
           </div>
           <div>
             <label className={labelCls}>Job title</label>
-            <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            <input name="title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
               className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Company <span className="text-slate-400 font-normal">(optional)</span></label>
-            <input value={form.company ?? ''} onChange={e => setForm(f => ({ ...f, company: e.target.value || null }))}
+            <input name="company" value={form.company ?? ''} onChange={e => setForm(f => ({ ...f, company: e.target.value || null }))}
               placeholder="Acme Corp" className={inputCls} />
           </div>
           <div>
             <label className={labelCls}>Tech context <span className="text-slate-400 font-normal">(optional)</span></label>
-            <input value={form.tech_context ?? ''} onChange={e => setForm(f => ({ ...f, tech_context: e.target.value || null }))}
+            <input name="tech_context" value={form.tech_context ?? ''} onChange={e => setForm(f => ({ ...f, tech_context: e.target.value || null }))}
               placeholder="e.g. ad-tech / mobile SDK / fintech payments" className={inputCls} />
             <p className="text-xs text-slate-500 mt-1">Domain or product context — helps the AI calibrate industry norms</p>
           </div>

@@ -1,4 +1,5 @@
 """Input contract for an assessment request."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, Field

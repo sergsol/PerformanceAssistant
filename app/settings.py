@@ -3,6 +3,7 @@
 The DB URL is swappable: SQLite locally + in tests, Postgres in production
 (Render). Because we use SQLModel/SQLAlchemy, only this string changes.
 """
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -17,8 +18,8 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # --- Auth lifetimes ---
-    access_token_ttl_minutes: int = 15        # short-lived access token (JWT)
-    refresh_token_ttl_days: int = 30          # longer-lived refresh token (server-side, revocable)
+    access_token_ttl_minutes: int = 15  # short-lived access token (JWT)
+    refresh_token_ttl_days: int = 30  # longer-lived refresh token (server-side, revocable)
 
     # --- Database ---
     # Local/dev/test default is SQLite. In production set DATABASE_URL to the
@@ -26,7 +27,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./perfreviewbot.db"
 
     # --- LLM ---
-    llm_provider: str = "gemini"          # "gemini" | "groq" | "stub"
+    llm_provider: str = "gemini"  # "gemini" | "groq" | "stub"
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.6-flash"
     groq_api_key: str = ""

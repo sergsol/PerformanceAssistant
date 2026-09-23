@@ -1,6 +1,7 @@
 """Password hashing helpers. Session handling is done via Starlette's signed
 session middleware (see main.py); we only store the user id in the session.
 """
+
 from __future__ import annotations
 
 from passlib.context import CryptContext

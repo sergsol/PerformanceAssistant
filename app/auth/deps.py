@@ -10,6 +10,7 @@ from app.db.session import get_session
 
 _bearer = HTTPBearer(auto_error=False)
 
+
 def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
     session: Session = Depends(get_session),
@@ -21,6 +22,7 @@ def get_current_user(
     except ValueError:
         return None
     return session.get(User, user_id)
+
 
 def require_user(user: User | None = Depends(get_current_user)) -> User:
     if user is None:

@@ -4,6 +4,7 @@ Privacy note: Profile stores only role context the AI needs (title/level/company
 tech context) — no sensitive PII. This boundary is deliberate and is a QA/security
 signal worth stating in the README.
 """
+
 from datetime import UTC, datetime
 from typing import Optional
 
@@ -58,6 +59,7 @@ class RefreshToken(SQLModel, table=True):
     ability to get new access tokens — i.e. real logout from all devices
     that used that token.
     """
+
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
     token_hash: str = Field(index=True, unique=True)  # hashed for storage

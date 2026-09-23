@@ -12,12 +12,14 @@ from app.db.session import get_session
 
 router = APIRouter(prefix="/api", tags=["history"])
 
+
 class HistoryItem(BaseModel):
     id: int
     created_at: datetime
     self_report: str
     overall_band: str
     result_json: str
+
 
 @router.get("/history", response_model=list[HistoryItem])
 def get_history(user: User = Depends(require_user), session: Session = Depends(get_session)):

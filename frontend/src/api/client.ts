@@ -2,7 +2,7 @@ import { refreshAccessToken } from './auth'
 
 const BASE = import.meta.env.VITE_API_URL ?? ''
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message)
   }
@@ -25,30 +25,7 @@ async function apiFetchRaw<T>(path: string, options: RequestInit = {}): Promise<
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res = await apiFetchRaw<T>(path, options)
-  return res
-}
-
-export async function apiFetchWithAuth<T>(path: string, options: RequestInit = {}): Promise<T> {
-  let res = await apiFetchRaw<T>(path, options)
-
-  // If we got a 401 and we have a token, try to refresh
-  const token = localStorage.getItem('access_token')
-  if (res instanceof ApiError && res.status === 401 && token) {
-    // The raw fetch already threw — we need to catch and retry
-    // Actually the above already threw. Let's handle this differently.
-  }
-
-  return res
-}
-
-// Auto-refresh wrapper: catches 401, refreshes, retries once
-export async function apiFetchAutoRefresh<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  let res = await apiFetchRaw<T>(path, options)
-  return res
+  return apiFetchRaw<T>(path, options)
 }
 
 // Use this for requests that need auto-refresh

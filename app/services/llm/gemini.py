@@ -3,6 +3,7 @@ dependency and keep the wrapper thin. Uses the free-tier Flash model by default.
 
 Docs: https://ai.google.dev/api/generate-content
 """
+
 from __future__ import annotations
 
 import httpx

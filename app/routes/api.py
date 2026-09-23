@@ -15,8 +15,10 @@ from app.settings import get_settings
 
 router = APIRouter(prefix="/api", tags=["assess"])
 
+
 class AssessInput(BaseModel):
     self_report: str = Field(min_length=1)
+
 
 @router.post("/assess", response_model=AssessResult)
 def api_assess(
@@ -29,6 +31,7 @@ def api_assess(
         raise HTTPException(status_code=400, detail="Complete your profile before assessing")
 
     from app.schemas.request import AssessRequest
+
     req = AssessRequest(
         scorecard_role=profile.scorecard_role,
         title=profile.title,
@@ -39,23 +42,24 @@ def api_assess(
     )
     client = get_llm_client()
     try:
-        result = assess(req, client, role=profile.scorecard_role,
-                        temperature=get_settings().llm_temperature)
+        result = assess(
+            req, client, role=profile.scorecard_role, temperature=get_settings().llm_temperature
+        )
     except httpx.HTTPStatusError as exc:
         raise HTTPException(
             status_code=502,
             detail=f"LLM error {exc.response.status_code}: {exc.response.text[:300]}",
         ) from exc
     except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail=str(exc)
-        ) from None
+        raise HTTPException(status_code=500, detail=str(exc)) from None
 
-    session.add(Assessment(
-        user_id=user.id,
-        self_report=body.self_report,
-        result_json=result.model_dump_json(),
-        overall_band=result.overall_band.value,
-    ))
+    session.add(
+        Assessment(
+            user_id=user.id,
+            self_report=body.self_report,
+            result_json=result.model_dump_json(),
+            overall_band=result.overall_band.value,
+        )
+    )
     session.commit()
     return result

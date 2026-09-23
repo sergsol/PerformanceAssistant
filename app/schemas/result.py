@@ -1,6 +1,7 @@
 """The AI output contract. Every LLM response is parsed and validated into
 AssessResult; anything that doesn't fit is a failure the tests will catch.
 """
+
 from __future__ import annotations
 
 from enum import Enum

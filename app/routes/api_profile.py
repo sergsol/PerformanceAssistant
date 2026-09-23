@@ -10,6 +10,7 @@ from app.db.session import get_session
 
 router = APIRouter(prefix="/api", tags=["profile"])
 
+
 class ProfileOut(BaseModel):
     display_name: str
     title: str
@@ -18,6 +19,7 @@ class ProfileOut(BaseModel):
     company: str | None
     tech_context: str | None
 
+
 class ProfileIn(BaseModel):
     display_name: str
     title: str = "Senior QA Engineer"
@@ -25,6 +27,7 @@ class ProfileIn(BaseModel):
     scorecard_role: str = "senior_qa"
     company: str | None = None
     tech_context: str | None = None
+
 
 @router.get("/profile", response_model=ProfileOut)
 def get_profile(
@@ -35,6 +38,7 @@ def get_profile(
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return ProfileOut(**profile.model_dump())
+
 
 @router.put("/profile", response_model=ProfileOut)
 def update_profile(

@@ -1,4 +1,5 @@
 """Unit tests for the pure assessor functions and scorecard loader (no network)."""
+
 from __future__ import annotations
 
 import json
@@ -21,8 +22,7 @@ def test_unknown_scorecard_raises():
 
 
 def test_build_prompt_includes_profile_and_scorecard():
-    req = AssessRequest(title="Senior QA Engineer", level="Senior",
-                        self_report="I write tests")
+    req = AssessRequest(title="Senior QA Engineer", level="Senior", self_report="I write tests")
     system, user = build_prompt(req)
     assert "Senior" in user
     assert "Test strategy & quality ownership" in user
@@ -31,7 +31,9 @@ def test_build_prompt_includes_profile_and_scorecard():
 
 def test_parse_result_strips_markdown_fences():
     payload = {
-        "overall_band": "Meets", "overall_summary": "ok", "trending": "Below",
+        "overall_band": "Meets",
+        "overall_summary": "ok",
+        "trending": "Below",
         "dimensions": [{"dimension": "X", "band": "Meets", "evidence": [], "gap": None}],
         "recommendations": [],
     }
@@ -43,7 +45,8 @@ def test_parse_result_strips_markdown_fences():
 
 
 def test_parse_result_rejects_bad_band():
-    bad = json.dumps({"overall_band": "Amazing", "overall_summary": "x",
-                      "dimensions": [], "recommendations": []})
+    bad = json.dumps(
+        {"overall_band": "Amazing", "overall_summary": "x", "dimensions": [], "recommendations": []}
+    )
     with pytest.raises(ValueError):
         parse_result(bad)
