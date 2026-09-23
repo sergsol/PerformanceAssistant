@@ -42,9 +42,14 @@ def api_assess(
         result = assess(req, client, role=profile.scorecard_role,
                         temperature=get_settings().llm_temperature)
     except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=502, detail=f"LLM error {exc.response.status_code}: {exc.response.text[:300]}")
+        raise HTTPException(
+            status_code=502,
+            detail=f"LLM error {exc.response.status_code}: {exc.response.text[:300]}",
+        ) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from None
+        raise HTTPException(
+            status_code=500, detail=str(exc)
+        ) from None
 
     session.add(Assessment(
         user_id=user.id,
