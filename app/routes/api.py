@@ -21,8 +21,8 @@ class AssessInput(BaseModel):
 @router.post("/assess", response_model=AssessResult)
 def api_assess(
     body: AssessInput,
-    user: User = Depends(require_user),  # noqa: B008
-    session: Session = Depends(get_session),  # noqa: B008
+    user: User = Depends(require_user),
+    session: Session = Depends(get_session),
 ):
     profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if not profile:
