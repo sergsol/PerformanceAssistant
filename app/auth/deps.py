@@ -11,8 +11,8 @@ from app.db.session import get_session
 _bearer = HTTPBearer(auto_error=False)
 
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
-    session: Session = Depends(get_session),
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),  # noqa: B008
+    session: Session = Depends(get_session),  # noqa: B008
 ) -> User | None:
     if credentials is None:
         return None
@@ -22,7 +22,7 @@ def get_current_user(
         return None
     return session.get(User, user_id)
 
-def require_user(user: User | None = Depends(get_current_user)) -> User:
+def require_user(user: User | None = Depends(get_current_user)) -> User:  # noqa: B008
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -27,14 +27,21 @@ class ProfileIn(BaseModel):
     tech_context: str | None = None
 
 @router.get("/profile", response_model=ProfileOut)
-def get_profile(user: User = Depends(require_user), session: Session = Depends(get_session)):
+def get_profile(
+    user: User = Depends(require_user),  # noqa: B008
+    session: Session = Depends(get_session),  # noqa: B008
+) -> ProfileOut:
     profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return ProfileOut(**profile.model_dump())
 
 @router.put("/profile", response_model=ProfileOut)
-def update_profile(body: ProfileIn, user: User = Depends(require_user), session: Session = Depends(get_session)):
+def update_profile(
+    body: ProfileIn,  # noqa: B008
+    user: User = Depends(require_user),  # noqa: B008
+    session: Session = Depends(get_session),  # noqa: B008
+) -> ProfileOut:
     profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if not profile:
         profile = Profile(user_id=user.id, **body.model_dump())

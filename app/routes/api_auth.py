@@ -47,7 +47,7 @@ class RefreshRequest(BaseModel):
 # ── Auth endpoints ───────────────────────────────────────────────────
 
 @router.post("/register", response_model=TokenPairResponse, status_code=201)
-def register(body: AuthRequest, session: Session = Depends(get_session)):
+def register(body: AuthRequest, session: Session = Depends(get_session)):  # noqa: B008
     if session.exec(select(User).where(User.email == body.email)).first():
         raise HTTPException(status_code=409, detail="Email already registered")
 
@@ -70,7 +70,7 @@ def register(body: AuthRequest, session: Session = Depends(get_session)):
 
 
 @router.post("/login", response_model=TokenPairResponse)
-def login(body: AuthRequest, session: Session = Depends(get_session)):
+def login(body: AuthRequest, session: Session = Depends(get_session)):  # noqa: B008
     user = session.exec(select(User).where(User.email == body.email)).first()
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
