@@ -2,6 +2,8 @@ import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { login, isAuthenticated } from '../api/auth'
 import { ApiError } from '../api/client'
+import PasswordInput from '../components/PasswordInput'
+import Spinner from '../components/Spinner'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -33,12 +35,12 @@ export default function Login() {
         <h1 className="text-xl font-medium mb-4">Log in</h1>
         {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input name="email" type="email" placeholder="name@company.com" required
+          <input name="email" type="email" placeholder="name@company.com" required autoComplete="email"
             className="w-full border border-slate-300 rounded-lg px-3 py-3 text-base bg-white" />
-          <input name="password" type="password" placeholder="Password" required
-            className="w-full border border-slate-300 rounded-lg px-3 py-3 text-base bg-white" />
-          <button disabled={loading}
-            className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 text-base font-medium disabled:opacity-60">
+          <PasswordInput autoComplete="current-password" />
+          <button disabled={loading} aria-busy={loading}
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white rounded-lg px-4 py-3 text-base font-medium disabled:opacity-60">
+            {loading && <Spinner />}
             {loading ? 'Logging in…' : 'Log in'}
           </button>
         </form>

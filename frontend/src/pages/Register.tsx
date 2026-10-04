@@ -2,6 +2,8 @@ import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register, isAuthenticated } from '../api/auth'
 import { ApiError } from '../api/client'
+import PasswordInput from '../components/PasswordInput'
+import Spinner from '../components/Spinner'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -35,11 +37,11 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-3">
           <input name="email" type="email" placeholder="name@company.com" required autoComplete="email"
             className="w-full border border-slate-300 rounded-lg px-3 py-3 text-base bg-white" />
-          <input name="password" type="password" placeholder="Password (min. 8 characters)" required
-            minLength={8} autoComplete="new-password"
-            className="w-full border border-slate-300 rounded-lg px-3 py-3 text-base bg-white" />
-          <button disabled={loading}
-            className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 text-base font-medium disabled:opacity-60">
+          <PasswordInput placeholder="Password (min. 8 characters)" minLength={8}
+            autoComplete="new-password" />
+          <button disabled={loading} aria-busy={loading}
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white rounded-lg px-4 py-3 text-base font-medium disabled:opacity-60">
+            {loading && <Spinner />}
             {loading ? 'Creating account…' : 'Register'}
           </button>
           {loading && (
