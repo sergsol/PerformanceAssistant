@@ -4,7 +4,9 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from app.auth.jwt import create_access_token
@@ -33,6 +35,20 @@ class AuthRequest(BaseModel):
     email: str = Field(min_length=1, max_length=254)
     password: str = Field(min_length=8)
 
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        v = v.strip().lower()
+        local, _, domain = v.partition("@")
+        if not local or "." not in domain or " " in v:
+            raise ValueError("Enter a valid email address")
+        return v
+
+
+def _find_user_by_email(session: Session, email: str) -> User | None:
+    # Case-insensitive so accounts created before emails were normalized still match.
+    return session.exec(select(User).where(func.lower(User.email) == email)).first()
+
 
 class TokenPairResponse(BaseModel):
     access_token: str
@@ -50,12 +66,17 @@ class RefreshRequest(BaseModel):
 
 @router.post("/register", response_model=TokenPairResponse, status_code=201)
 def register(body: AuthRequest, session: Session = Depends(get_session)):
-    if session.exec(select(User).where(User.email == body.email)).first():
+    if _find_user_by_email(session, body.email):
         raise HTTPException(status_code=409, detail="Email already registered")
 
     user = User(email=body.email, password_hash=hash_password(body.password))
     session.add(user)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError:
+        # Two simultaneous signups with the same email: unique index wins.
+        session.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered") from None
     session.refresh(user)
     uid = user.id
     assert uid is not None
@@ -73,7 +94,7 @@ def register(body: AuthRequest, session: Session = Depends(get_session)):
 
 @router.post("/login", response_model=TokenPairResponse)
 def login(body: AuthRequest, session: Session = Depends(get_session)):
-    user = session.exec(select(User).where(User.email == body.email)).first()
+    user = _find_user_by_email(session, body.email)
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 

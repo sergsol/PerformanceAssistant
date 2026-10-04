@@ -21,7 +21,7 @@ export default function Register() {
       await register(fd.get('email') as string, fd.get('password') as string)
       navigate('/profile')
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong')
+      setError(err instanceof ApiError ? err.message : 'Unexpected response from the server. Please try again.')
     } finally { setLoading(false) }
   }
 
@@ -33,14 +33,20 @@ export default function Register() {
         <h1 className="text-xl font-medium mb-4">Create account</h1>
         {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input name="email" type="email" placeholder="name@company.com" required
+          <input name="email" type="email" placeholder="name@company.com" required autoComplete="email"
             className="w-full border border-slate-300 rounded-lg px-3 py-3 text-base bg-white" />
-          <input name="password" type="password" placeholder="Password" required
+          <input name="password" type="password" placeholder="Password (min. 8 characters)" required
+            minLength={8} autoComplete="new-password"
             className="w-full border border-slate-300 rounded-lg px-3 py-3 text-base bg-white" />
           <button disabled={loading}
             className="w-full bg-slate-900 text-white rounded-lg px-4 py-3 text-base font-medium disabled:opacity-60">
             {loading ? 'Creating account…' : 'Register'}
           </button>
+          {loading && (
+            <p className="text-xs text-slate-500 text-center">
+              The server may be waking up — this can take up to a minute on first use.
+            </p>
+          )}
         </form>
         <p className="text-sm text-slate-600 mt-4 text-center">Have an account? <Link to="/login" className="underline">Log in</Link></p>
       </div>

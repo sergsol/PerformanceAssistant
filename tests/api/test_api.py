@@ -63,6 +63,46 @@ def test_duplicate_registration_conflicts(client):
     assert resp.status_code == 409
 
 
+def test_duplicate_registration_is_case_insensitive(client):
+    client.post(
+        "/api/auth/register",
+        json={"email": "Case@X.com", "password": "password123"},
+    )
+    resp = client.post(
+        "/api/auth/register",
+        json={"email": "  case@x.COM ", "password": "password456"},
+    )
+    assert resp.status_code == 409
+
+
+def test_login_email_is_case_insensitive(client):
+    client.post(
+        "/api/auth/register",
+        json={"email": "mixed@x.com", "password": "password123"},
+    )
+    resp = client.post(
+        "/api/auth/login",
+        json={"email": "MIXED@x.com", "password": "password123"},
+    )
+    assert resp.status_code == 200
+
+
+def test_register_rejects_invalid_email(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"email": "not-an-email", "password": "password123"},
+    )
+    assert resp.status_code == 422
+
+
+def test_register_rejects_short_password(client):
+    resp = client.post(
+        "/api/auth/register",
+        json={"email": "short@x.com", "password": "short"},
+    )
+    assert resp.status_code == 422
+
+
 def test_history_persists_after_assess(registered_client):
     registered_client.post(
         "/api/assess",
