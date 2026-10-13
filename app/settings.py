@@ -27,9 +27,11 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./perfreviewbot.db"
 
     # --- LLM ---
-    llm_provider: str = "gemini"  # "gemini" | "groq" | "stub"
+    llm_provider: str = "gemini"  # "gemini" | "openai" | "groq" | "stub"
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.6-flash"
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
