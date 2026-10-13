@@ -157,3 +157,12 @@ def test_data_isolation_ui(registered_user, page, browser):
     page_b.wait_for_selector("text=Loading…", state="detached")
     assert "No assessments yet" in page_b.inner_text("body")
     ctx_b.close()
+
+
+@pytest.mark.parametrize("path", ["/login", "/register"])
+def test_authenticated_user_is_redirected_away_from_auth_pages(registered_user, page, path):
+    """A logged-in user opening /login or /register lands on the app, not a blank page."""
+    _login(page)
+    page.goto(f"{BASE}{path}")
+    page.wait_for_url(f"{BASE}/", wait_until="commit")
+    page.wait_for_selector("textarea[name=self_report]")
