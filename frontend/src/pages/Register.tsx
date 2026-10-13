@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { register, isAuthenticated } from '../api/auth'
 import { ApiError } from '../api/client'
 import PasswordInput from '../components/PasswordInput'
@@ -10,10 +10,7 @@ export default function Register() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  if (isAuthenticated()) {
-    navigate('/')
-    return null
-  }
+  if (isAuthenticated()) return <Navigate to="/" replace />
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
