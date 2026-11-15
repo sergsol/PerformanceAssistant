@@ -169,3 +169,53 @@ def test_data_isolation_between_users(client):
     resp = client.get("/api/history")
     assert resp.status_code == 200
     assert resp.json() == []
+
+
+# --- Login-free flow ---------------------------------------------------------
+
+
+def test_assess_works_without_an_account(client):
+    resp = client.post(
+        "/api/assess",
+        json={"self_report": "I run the roadmap.", "scorecard_role": "senior_prodm"},
+    )
+    assert resp.status_code == 200
+    names = [d["dimension"] for d in resp.json()["dimensions"]]
+    assert "Discovery & customer insight" in names
+    assert len(names) == 6
+
+
+def test_anonymous_assess_defaults_to_senior_qa(client):
+    resp = client.post("/api/assess", json={"self_report": "I write tests and report bugs."})
+    assert resp.status_code == 200
+    assert resp.json()["dimensions"][0]["dimension"] == "Technical execution & automation"
+
+
+def test_anonymous_assess_is_not_saved_anywhere(client):
+    client.post("/api/assess", json={"self_report": "I write tests.", "scorecard_role": "mid_qa"})
+    # History is account-only and an anonymous caller has none.
+    assert client.get("/api/history").status_code == 401
+
+
+def test_unknown_role_rejected(client):
+    resp = client.post("/api/assess", json={"self_report": "x", "scorecard_role": "wizard"})
+    assert resp.status_code == 422
+
+
+def test_overlong_self_report_rejected(client):
+    resp = client.post("/api/assess", json={"self_report": "a" * 8001})
+    assert resp.status_code == 422
+
+
+def test_assess_is_rate_limited_per_client(monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from app.main import create_app
+    from app.settings import get_settings
+
+    monkeypatch.setattr(get_settings(), "assess_rate_limit_per_hour", 2)
+    limited = TestClient(create_app())
+    body = {"self_report": "I write tests."}
+    assert limited.post("/api/assess", json=body).status_code == 200
+    assert limited.post("/api/assess", json=body).status_code == 200
+    assert limited.post("/api/assess", json=body).status_code == 429

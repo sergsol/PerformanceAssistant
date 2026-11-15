@@ -1,0 +1,304 @@
+# Compact scorecards for additional engineering-org roles.
+#
+# Each family lists its levels (lowest -> highest) and six dimensions. For every
+# dimension, `meets` holds one expectation per level (same order as `levels`),
+# `below` is a level-independent description of falling short, and `exceeds` is
+# derived at load time as "operating at the next level's bar" (the top level
+# uses `top_exceeds`). app/scorecard/loader.py expands this into the same
+# per-level shape as scorecard.yaml, keyed "<level_key>" (e.g. "senior_devops").
+#
+# Provenance: these rubrics are synthesized from publicly available competency
+# models and career-ladder patterns, not from any one company's ladder:
+#   pm      - PMI PMBOK Guide + PMI Talent Triangle (ways of working, power
+#             skills, business acumen); common PM/program-management ladders
+#   prodm   - SVPG "Inspired"/"Empowered" product-manager competencies;
+#             Mind the Product and Reforge-style PM career ladders
+#   devops  - DORA / Accelerate delivery metrics; Google SRE books (SLOs, error
+#             budgets, blameless postmortems); CNCF platform-engineering guidance
+#   security- NIST NICE Workforce Framework; OWASP SAMM and Secure SDLC practices
+#   hr      - SHRM Competency Model; CIPD Profession Map; common HRBP ladders
+
+pm:
+  label: "Project Manager"
+  levels:
+    - {key: junior_pm, level: Junior, role: "Junior Project Manager"}
+    - {key: mid_pm, level: Mid, role: "Project Manager"}
+    - {key: senior_pm, level: Senior, role: "Senior Project Manager"}
+    - {key: lead_pm, level: Lead, role: "Program Manager"}
+  dimensions:
+    - name: "Planning & delivery"
+      below: "Plans are missing, stale, or ignored; milestones slip without warning."
+      meets:
+        - "Maintains a clear plan for assigned work packages and hits most dated milestones with guidance."
+        - "Plans and delivers a whole project end to end: breakdown, dependencies, milestones, and regular status."
+        - "Delivers complex multi-team projects on time by sequencing dependencies and re-planning proactively."
+        - "Delivers a portfolio/program of related projects, aligning plans and dependencies across teams."
+      top_exceeds: "Sets the planning standards and delivery cadence adopted by the whole organization."
+    - name: "Scope, schedule & budget control"
+      below: "Scope creeps unnoticed; budget and schedule variances are discovered late."
+      meets:
+        - "Tracks tasks and effort accurately and flags variances to the project manager."
+        - "Controls scope through change requests; tracks schedule and budget and reports variances early."
+        - "Balances scope, schedule, and budget trade-offs on large projects and gets explicit sponsor decisions."
+        - "Owns program-level budget and scope governance, including re-baselining and benefits tracking."
+      top_exceeds: "Introduces forecasting and governance practices that measurably improve predictability across programs."
+    - name: "Risk & issue management"
+      below: "Risks are not tracked; issues surface only when they have already hurt delivery."
+      meets:
+        - "Logs risks and issues raised by the team and escalates them promptly."
+        - "Maintains a risk register with owners and mitigations; resolves most issues before they hit milestones."
+        - "Anticipates cross-team and external risks, runs mitigation plans, and escalates with options."
+        - "Manages program-level risk and dependencies, making risk trade-offs visible to leadership."
+      top_exceeds: "Builds an organization-wide risk practice that is demonstrably preventing escalations."
+    - name: "Stakeholder communication"
+      below: "Updates are irregular or unclear; stakeholders are surprised by status changes."
+      meets:
+        - "Gives clear, regular status updates to the team and project manager."
+        - "Runs predictable stakeholder communication (status reports, steering updates) with no surprises."
+        - "Manages senior and external stakeholders, aligns conflicting expectations, and negotiates trade-offs."
+        - "Communicates credibly with executives and aligns multiple sponsors around program direction."
+      top_exceeds: "Is the trusted voice to the executive team and shapes how delivery is communicated company-wide."
+    - name: "Team leadership & facilitation"
+      below: "Meetings lack purpose; team members are unclear on ownership; conflicts are avoided."
+      meets:
+        - "Facilitates stand-ups and meetings reliably and keeps action items visible."
+        - "Leads a project team without formal authority, clarifies ownership, and resolves day-to-day conflicts."
+        - "Leads cross-functional teams through ambiguity, coaches team members, and builds healthy delivery habits."
+        - "Leads and mentors other project managers and sets the facilitation and retrospective standards."
+      top_exceeds: "Develops a bench of project/program managers and creates practices that outlast any one project."
+    - name: "Business value & outcomes"
+      below: "Focuses on activity and task completion with no link to why the project matters."
+      meets:
+        - "Understands the purpose of the project and the value it should deliver."
+        - "Ties project scope to the business case and tracks whether delivered work achieves its goals."
+        - "Reshapes scope to protect business value and measures outcomes after delivery."
+        - "Manages benefits realization across the program and recommends stop/continue decisions based on value."
+      top_exceeds: "Influences portfolio investment decisions through outcome data and benefits realization."
+
+prodm:
+  label: "Product Manager"
+  levels:
+    - {key: associate_prodm, level: Associate, role: "Associate Product Manager"}
+    - {key: mid_prodm, level: Mid, role: "Product Manager"}
+    - {key: senior_prodm, level: Senior, role: "Senior Product Manager"}
+    - {key: principal_prodm, level: Principal, role: "Principal Product Manager"}
+  dimensions:
+    - name: "Discovery & customer insight"
+      below: "Builds from assumptions or stakeholder requests without talking to users or looking at data."
+      meets:
+        - "Joins customer conversations and synthesizes findings into clear problem statements with guidance."
+        - "Runs regular discovery (interviews, usage data, experiments) and brings validated problems to the team."
+        - "Leads continuous discovery for a product area, triangulating qualitative and quantitative evidence."
+        - "Uncovers non-obvious opportunities across segments and shapes company-level insight practices."
+      top_exceeds: "Creates market and customer insight that redirects company strategy."
+    - name: "Strategy & roadmap"
+      below: "Roadmap is a list of requests with no strategy, themes, or rationale."
+      meets:
+        - "Maintains the backlog and contributes to the roadmap for a feature area."
+        - "Owns a roadmap for a product, connected to goals and explained with clear rationale."
+        - "Defines product strategy for an area, aligned with company vision, and says no with reasons."
+        - "Sets multi-year product strategy across areas and aligns it with company direction and competitive position."
+      top_exceeds: "Defines strategy that creates new lines of business or fundamentally repositions the product."
+    - name: "Prioritization & decision-making"
+      below: "Prioritizes by loudest voice; decisions are slow, undocumented, or reversed repeatedly."
+      meets:
+        - "Applies a prioritization framework with guidance and explains the trade-offs made."
+        - "Makes timely, data-informed prioritization decisions and documents the reasoning."
+        - "Makes high-stakes calls under ambiguity, balancing customer value, effort, and risk."
+        - "Resolves cross-product trade-offs and sets the decision frameworks other PMs use."
+      top_exceeds: "Is the decision-maker others escalate to for the hardest, highest-stakes product calls."
+    - name: "Execution & engineering partnership"
+      below: "Requirements are unclear or churn mid-sprint; engineering is frequently blocked or surprised."
+      meets:
+        - "Writes clear user stories and acceptance criteria and unblocks the team quickly."
+        - "Partners with engineering and design to ship scoped increments predictably with quality."
+        - "Drives delivery of complex, multi-team initiatives and manages dependencies and launch readiness."
+        - "Ensures flawless cross-team execution of company-critical bets and improves how product and engineering work together."
+      top_exceeds: "Raises the product-development operating model across the whole organization."
+    - name: "Stakeholder alignment & communication"
+      below: "Stakeholders are unclear on what is being built or why; conflicts escalate unresolved."
+      meets:
+        - "Communicates product updates clearly to the team and direct stakeholders."
+        - "Aligns stakeholders (sales, support, marketing, leadership) on priorities and keeps them informed."
+        - "Influences senior leadership and customers, aligning conflicting stakeholders around a single direction."
+        - "Builds executive and board-level alignment and communicates product vision persuasively."
+      top_exceeds: "Shapes how the company talks about and invests in its product, internally and externally."
+    - name: "Outcomes & metrics"
+      below: "Success is measured by features shipped; no defined metrics or post-launch review."
+      meets:
+        - "Tracks the basic usage and success metrics for features shipped."
+        - "Defines success metrics up front, instruments them, and reviews results after launch."
+        - "Owns a product-area outcome metric and shows how decisions moved it, including learning from misses."
+        - "Owns and moves company-level outcome metrics and builds the measurement practices other teams adopt."
+      top_exceeds: "Demonstrably drives major revenue, retention, or market-share outcomes tied to their product decisions."
+
+devops:
+  label: "DevOps Engineer"
+  levels:
+    - {key: junior_devops, level: Junior, role: "Junior DevOps Engineer"}
+    - {key: mid_devops, level: Mid, role: "DevOps Engineer"}
+    - {key: senior_devops, level: Senior, role: "Senior DevOps Engineer"}
+    - {key: staff_devops, level: Staff, role: "Staff DevOps / Platform Engineer"}
+  dimensions:
+    - name: "CI/CD & automation"
+      below: "Builds and deploys are manual or fragile; pipelines break without a clear owner."
+      meets:
+        - "Maintains and extends existing pipelines and automates repetitive tasks with guidance."
+        - "Designs and owns CI/CD pipelines for services, with reliable builds, tests, and repeatable deployments."
+        - "Builds reusable pipeline templates and deployment strategies (canary, blue/green) adopted by many teams."
+        - "Defines the delivery platform strategy and paved paths that make safe deployment the default org-wide."
+      top_exceeds: "Delivers a platform that measurably changes delivery performance across the whole engineering org."
+    - name: "Infrastructure & cloud (IaC)"
+      below: "Infrastructure is changed by hand, undocumented, and differs between environments."
+      meets:
+        - "Applies infrastructure-as-code changes using established modules under review."
+        - "Provisions and manages environments as code with sound networking, access, and cost basics."
+        - "Architects scalable, cost-aware, multi-environment infrastructure and drives IaC standards and module reuse."
+        - "Designs multi-region/multi-account architecture and platform abstractions that reduce toil for all teams."
+      top_exceeds: "Sets the infrastructure architecture direction and cost model for the organization."
+    - name: "Reliability & observability"
+      below: "Little monitoring; incidents are found by users, with no follow-up on root causes."
+      meets:
+        - "Sets up dashboards and alerts and participates in incident response and on-call with support."
+        - "Owns monitoring and alerting for their services, responds to incidents, and writes blameless postmortems."
+        - "Defines SLOs and error budgets, reduces alert noise, and leads incident response and systemic fixes."
+        - "Establishes reliability practices across services and drives down incident rate and recovery time org-wide."
+      top_exceeds: "Builds a reliability culture and tooling that measurably cuts incidents and time to recovery company-wide."
+    - name: "Security & compliance in the pipeline"
+      below: "Secrets and access are handled ad hoc; security checks are skipped or bypassed."
+      meets:
+        - "Follows secrets-handling and least-privilege practices and runs the standard pipeline security checks."
+        - "Integrates dependency, image, and IaC scanning into pipelines and manages secrets and access correctly."
+        - "Designs secure-by-default pipelines and infrastructure, and partners with security on policy-as-code."
+        - "Defines org-wide supply-chain and compliance controls that are automated and auditable."
+      top_exceeds: "Makes compliance and security a measurable, automated property of the platform."
+    - name: "Collaboration & enablement"
+      below: "Works as a ticket queue; developers are blocked or confused about how to use the tooling."
+      meets:
+        - "Responds to developer requests and documents what they build."
+        - "Helps developers adopt the tooling, writes useful docs/runbooks, and shares knowledge with the team."
+        - "Enables multiple teams through self-service tooling, mentors engineers, and leads blameless reviews."
+        - "Grows the capability of the platform/DevOps team and treats the platform as a product with internal users."
+      top_exceeds: "Creates an engineering enablement culture whose practices are copied beyond the organization."
+    - name: "Business & delivery impact"
+      below: "Work is not connected to delivery speed, stability, or cost outcomes."
+      meets:
+        - "Understands how their work supports delivery speed and stability."
+        - "Tracks delivery metrics (deployment frequency, lead time, change failure rate, recovery time) for their area."
+        - "Improves delivery metrics and cloud cost for several teams and ties investment to measured outcomes."
+        - "Drives org-wide improvement in delivery performance and infrastructure cost, with results reported to leadership."
+      top_exceeds: "Delivers step-change gains in delivery performance or cost efficiency that shape company investment."
+
+security:
+  label: "Security Specialist"
+  levels:
+    - {key: junior_security, level: Junior, role: "Junior Security Engineer"}
+    - {key: mid_security, level: Mid, role: "Security Engineer"}
+    - {key: senior_security, level: Senior, role: "Senior Security Engineer"}
+    - {key: staff_security, level: Staff, role: "Staff Security Engineer"}
+  dimensions:
+    - name: "Threat modeling & risk assessment"
+      below: "Security risks are identified informally or after the fact; no consistent method."
+      meets:
+        - "Contributes to threat models and risk assessments led by others and documents findings clearly."
+        - "Leads threat modeling for features and services and rates risk consistently (e.g. STRIDE, CVSS-based)."
+        - "Leads threat modeling for complex systems and architecture reviews and prioritizes risk by business impact."
+        - "Defines the threat-modeling and risk-assessment approach for the organization and applies it to strategic systems."
+      top_exceeds: "Shapes the company risk posture by identifying systemic risks before they materialize."
+    - name: "Vulnerability management & testing"
+      below: "Vulnerabilities linger without owners or deadlines; findings are noisy or unreproducible."
+      meets:
+        - "Triages scanner findings and verifies fixes using established tools and processes."
+        - "Runs SAST/DAST/dependency scanning and testing, triages by exploitability, and tracks fixes to closure."
+        - "Designs the vulnerability-management program for an area: SLAs, tooling, penetration-test scoping, and metrics."
+        - "Drives org-wide vulnerability management and testing strategy, and reduces mean time to remediate across teams."
+      top_exceeds: "Builds testing and remediation capabilities that measurably shrink the organization's exposure."
+    - name: "Secure engineering enablement"
+      below: "Security is a late-stage gate; engineers hear about it only when a release is blocked."
+      meets:
+        - "Answers developer security questions and helps apply secure coding guidance."
+        - "Embeds security into the SDLC with reviews, secure defaults, and developer-friendly guidance."
+        - "Builds secure-by-default libraries, pipelines, and training adopted by multiple teams."
+        - "Sets the secure-development strategy and champions programs that scale security across engineering."
+      top_exceeds: "Makes the secure path the default path for the entire engineering organization."
+    - name: "Detection & incident response"
+      below: "Security events are noticed late; response is improvised and not reviewed afterward."
+      meets:
+        - "Follows incident runbooks, collects evidence, and escalates events appropriately."
+        - "Investigates alerts, contributes to incident response, and improves detections and runbooks."
+        - "Leads incident response for significant events and builds detections and playbooks that reduce response time."
+        - "Defines detection and response strategy and leads the most critical incidents end to end."
+      top_exceeds: "Builds a detection and response capability that meaningfully reduces time to detect and contain."
+    - name: "Governance, compliance & policy"
+      below: "Policies are unknown or ignored; audits require last-minute scrambling."
+      meets:
+        - "Supports compliance evidence gathering and follows security policies."
+        - "Maps controls to frameworks (e.g. ISO 27001, SOC 2) and maintains evidence for their area."
+        - "Owns control design and audit readiness for a domain and translates policy into practical engineering requirements."
+        - "Shapes the security policy and compliance strategy and is the technical authority in audits and customer reviews."
+      top_exceeds: "Makes compliance a continuous, automated outcome that unblocks business growth."
+    - name: "Influence & business risk communication"
+      below: "Findings are communicated in technical jargon without risk context or recommended actions."
+      meets:
+        - "Reports findings clearly with reproduction steps and recommended remediation."
+        - "Explains risk to engineering and product in business terms and builds trusted working relationships."
+        - "Influences senior engineering and product leaders to accept risk-informed decisions and trade-offs."
+        - "Advises executives on security risk and investment and is seen as a cross-organization security authority."
+      top_exceeds: "Shapes executive and board-level decisions about security risk and investment."
+
+hr:
+  label: "HR / People"
+  levels:
+    - {key: associate_hr, level: Associate, role: "HR Associate / Coordinator"}
+    - {key: generalist_hr, level: Generalist, role: "HR Generalist / Business Partner"}
+    - {key: senior_hr, level: Senior, role: "Senior HR Business Partner"}
+    - {key: lead_hr, level: Lead, role: "HR Lead / Head of People"}
+  dimensions:
+    - name: "HR operations & process excellence"
+      below: "Processes are error-prone, inconsistent, or late; records and requests slip through."
+      meets:
+        - "Executes HR processes (onboarding, records, payroll inputs, requests) accurately and on time."
+        - "Owns end-to-end HR processes for a population and keeps them accurate, compliant, and timely."
+        - "Improves and automates HR processes and systems for multiple teams and reduces cycle times and errors."
+        - "Designs the HR operating model and systems landscape and sets service levels for the function."
+      top_exceeds: "Builds an HR operating model that scales smoothly with the company's growth."
+    - name: "Talent acquisition & development"
+      below: "Hiring and development are reactive; managers lack support and candidates have inconsistent experiences."
+      meets:
+        - "Coordinates recruiting logistics and development activities and supports managers with process."
+        - "Partners with managers on hiring, onboarding, and development plans and improves candidate and employee experience."
+        - "Shapes hiring strategy, leveling, and career frameworks and measurably improves quality of hire and retention."
+        - "Owns talent strategy including workforce planning, leadership development, and succession for the organization."
+      top_exceeds: "Delivers talent outcomes (quality of hire, internal mobility, retention) that materially move company results."
+    - name: "Employee relations & compliance"
+      below: "Employee issues are handled inconsistently; legal and policy compliance gaps appear."
+      meets:
+        - "Follows policy and escalates employee relations issues appropriately while keeping confidentiality."
+        - "Handles employee relations cases fairly and consistently and keeps policies and practices compliant with employment law."
+        - "Handles complex investigations and sensitive cases, coaches managers, and proactively reduces risk."
+        - "Sets employee relations and compliance standards, and is the trusted advisor on high-risk matters and multi-jurisdiction issues."
+      top_exceeds: "Builds a fair, low-risk employee relations environment recognized by employees and leaders alike."
+    - name: "People analytics & data"
+      below: "Decisions rely on anecdote; HR data is incomplete, inconsistent, or not shared."
+      meets:
+        - "Maintains accurate HR data and produces standard reports."
+        - "Uses people data (turnover, engagement, hiring funnel) to inform recommendations to managers."
+        - "Builds analyses that identify root causes and drive decisions on compensation, retention, and organization design."
+        - "Establishes the people-analytics strategy and metrics that leadership uses to steer workforce decisions."
+      top_exceeds: "Creates predictive people insight that leadership relies on for major workforce decisions."
+    - name: "Business partnering & consultation"
+      below: "Operates as an administrator; leaders do not consult HR on business decisions."
+      meets:
+        - "Responds helpfully to employee and manager questions and escalates what they cannot resolve."
+        - "Acts as a trusted adviser to managers on team health, performance, and organization questions."
+        - "Partners with senior leaders to diagnose people issues and shape org design, planning, and performance cycles."
+        - "Advises the executive team on people strategy and is involved early in business planning."
+      top_exceeds: "Is a strategic partner whose people advice directly shapes company strategy."
+    - name: "Culture, engagement & change"
+      below: "Culture and engagement are left to chance; change is announced without support."
+      meets:
+        - "Supports culture and engagement activities and communications."
+        - "Runs engagement initiatives for their population and acts on survey feedback."
+        - "Leads culture and change initiatives (reorgs, performance cycles, policy changes) with measurable adoption."
+        - "Shapes company culture and values and leads large-scale change programs with measurable engagement results."
+      top_exceeds: "Builds a culture and engagement environment that is measurably a competitive advantage."

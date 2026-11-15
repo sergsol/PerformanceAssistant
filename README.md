@@ -14,7 +14,9 @@ Writing tests and reporting bugs is solid *execution* — but for a Senior it's 
 
 ## What it does
 
-**Flow:** `Register / Login` → `Profile setup` → `New assessment` → `Result` → `History`
+**Flow (no account needed):** `Pick role & level` → `Self-assessment (with tips)` → `Result`
+
+Roles: Developer, QA, DevOps, Security, Product Owner, Product Manager, Project Manager, HR/People. The old login, profile and history screens were removed from the UI; the account API (`/api/auth`, `/api/profile`, `/api/history`) is still in the backend but unused by the app. `POST /api/assess` is anonymous and rate-limited per IP (`ASSESS_RATE_LIMIT_PER_HOUR`, default 20; `0` disables).
 
 - **Profile** (read by the AI): name, title/level, company, tech context. Kept minimal — no sensitive PII. This is the privacy boundary: the model sees role context, not personal data.
 - **Assessment:** paste "what I did this cycle" — the AI already knows your level from the profile and grades against the right rubric.

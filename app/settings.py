@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
+    # --- Anonymous /api/assess guard rails (the endpoint calls a paid LLM) ---
+    assess_rate_limit_per_hour: int = 20  # per client IP; 0 disables the limit
+    assess_max_self_report_chars: int = 8000
+
     # Assessment reproducibility knob for calibration tests
     llm_temperature: float = 0.2
 

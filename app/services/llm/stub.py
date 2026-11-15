@@ -10,6 +10,12 @@ tested separately in evals/ against a live model.
 from __future__ import annotations
 
 import json
+import re
+
+
+def _dimension_names(user_prompt: str) -> list[str]:
+    section = user_prompt.split("SCORECARD", 1)[-1].split("AGGREGATION GUIDANCE", 1)[0]
+    return re.findall(r"^- (.+)$", section, flags=re.MULTILINE)
 
 
 class StubClient:
@@ -30,43 +36,34 @@ class StubClient:
         def band(present: bool) -> str:
             return "Meets" if present else "Below"
 
+        # Dimension names come from the SCORECARD section of the prompt so the stub
+        # works for every role. Index convention (matches the original QA rubric):
+        # 1 = strategy-like, 3 and 4 = influence/mentorship-like.
+        names = _dimension_names(user)
+        presence = {1: has_strategy, 3: has_influence, 4: has_influence}
+        gaps = {
+            1: "Own strategy for a feature.",
+            3: "Present quality metrics to stakeholders.",
+            4: "Mentor a junior tester.",
+            0: "Improve the framework itself.",
+        }
+        dims = []
+        for i, name in enumerate(names):
+            b = band(presence[i]) if i in presence else "Meets"
+            dims.append(
+                {
+                    "dimension": name,
+                    "band": b,
+                    "evidence": ["writes tests"] if i == 0 else [],
+                    "gap": gaps.get(i) if (i in gaps and b != "Exceeds") else None,
+                }
+            )
+
         result = {
             "overall_band": "Meets",
             "overall_summary": "Stubbed assessment for testing.",
             "trending": "Below",
-            "dimensions": [
-                {
-                    "dimension": "Technical execution & automation",
-                    "band": "Meets",
-                    "evidence": ["writes tests"],
-                    "gap": "Improve the framework itself.",
-                },
-                {
-                    "dimension": "Test strategy & quality ownership",
-                    "band": band(has_strategy),
-                    "evidence": [],
-                    "gap": "Own strategy for a feature.",
-                },
-                {"dimension": "Autonomy & scope", "band": "Meets", "evidence": [], "gap": None},
-                {
-                    "dimension": "Influence & collaboration",
-                    "band": band(has_influence),
-                    "evidence": [],
-                    "gap": "Present quality metrics to stakeholders.",
-                },
-                {
-                    "dimension": "Mentorship",
-                    "band": band(has_influence),
-                    "evidence": [],
-                    "gap": "Mentor a junior tester.",
-                },
-                {
-                    "dimension": "Business & risk impact",
-                    "band": "Meets",
-                    "evidence": [],
-                    "gap": None,
-                },
-            ],
+            "dimensions": dims,
             "recommendations": [
                 "Own the test strategy for one feature end to end.",
                 "Present quality metrics to stakeholders.",

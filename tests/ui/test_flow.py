@@ -1,112 +1,90 @@
-"""End-to-end UI tests (Phase 6). Marked 'ui' so they run in a dedicated CI
-stage that has a browser + a running server.
+"""End-to-end UI tests for the login-free flow (Python + Playwright + Pytest).
+
+Flow under test: role selector -> self-assessment (with tips) -> performance result.
+No account is created anywhere in these tests.
 
 Run locally:
-    LLM_PROVIDER=stub uvicorn app.main:app --port 8000 &
+    cd frontend && npm ci && npm run build && cd ..
+    LLM_PROVIDER=stub ASSESS_RATE_LIMIT_PER_HOUR=0 uvicorn app.main:app --port 8000 &
     playwright install chromium
-    pytest -m ui --base-url http://localhost:8000
+    pytest -m ui
 """
 
 from __future__ import annotations
 
+import os
+import re
+
 import pytest
+from playwright.sync_api import Page, expect
 
 pytestmark = pytest.mark.ui
 
-BASE = "http://localhost:8000"
-EMAIL = "ui_test@example.com"
-PASSWORD = "testpass123"
+BASE = os.environ.get("BASE_URL", "http://localhost:8000")
+
+ROLE_LABELS = [
+    "Developer",
+    "QA Engineer",
+    "DevOps Engineer",
+    "Security Specialist",
+    "Product Owner",
+    "Product Manager",
+    "Project Manager",
+    "HR / People",
+]
 
 
-@pytest.fixture(scope="session")
-def registered_user(browser):
-    """Register the shared test user once; delete them from the DB on teardown.
-
-    This means every full test run starts clean and the user can be re-created
-    on the next run without a 409 conflict.
-    """
-    import sqlite3
-    from pathlib import Path
-
-    ctx = browser.new_context()
-    page = ctx.new_page()
-
-    page.goto(f"{BASE}/register")
-    page.fill("input[name=email]", EMAIL)
-    page.fill("input[name=password]", PASSWORD)
-    page.click("button:has-text('Register')")
-    page.wait_for_load_state("networkidle")
-
-    if "/profile" in page.url:
-        page.fill("input[name=display_name]", "UI Tester")
-        page.select_option("select[name=role]", "qa")
-        page.select_option("select[name=level]", "senior_qa")
-        page.fill("input[name=company]", "Acme")
-        page.fill("input[name=tech_context]", "Python API testing")
-        page.click("button:has-text('Save profile')")
-        page.wait_for_url(f"{BASE}/", wait_until="commit")
-
-    ctx.close()
-    yield EMAIL, PASSWORD
-
-    # Teardown: remove the test users from the live DB so the next run starts fresh.
-    db_path = Path(__file__).parent.parent.parent / "perfreviewbot.db"
-    if db_path.exists():
-        conn = sqlite3.connect(str(db_path))
-        conn.execute(
-            "DELETE FROM assessment WHERE user_id IN (SELECT id FROM user WHERE email IN (?, ?))",
-            (EMAIL, "ui_isolation@example.com"),
-        )
-        conn.execute(
-            "DELETE FROM profile WHERE user_id IN (SELECT id FROM user WHERE email IN (?, ?))",
-            (EMAIL, "ui_isolation@example.com"),
-        )
-        conn.execute("DELETE FROM user WHERE email IN (?, ?)", (EMAIL, "ui_isolation@example.com"))
-        conn.commit()
-        conn.close()
+def pick_role(page: Page, role_label: str, level_label: str) -> None:
+    page.get_by_text(role_label, exact=True).first.click()
+    page.select_option("select[name=level]", label=level_label)
+    page.click("button:has-text('Continue')")
 
 
-def _login(page, email: str = EMAIL, password: str = PASSWORD):
-    """Log in and return when the home page is ready."""
-    page.goto(f"{BASE}/login")
-    page.fill("input[name=email]", email)
-    page.fill("input[name=password]", password)
-    page.click("button:has-text('Log in')")
-    page.wait_for_url(f"{BASE}/", wait_until="commit")
-
-
-def test_register_and_login(registered_user, page):
-    """Log out then log back in — auth round-trip works."""
-    _login(page)
-    page.click("button:has-text('Log out')")
-    page.wait_for_url(f"{BASE}/login", wait_until="commit")
-
-    _login(page)
-    page.wait_for_selector("textarea[name=self_report]")
-    assert "Get assessment" in page.inner_text("body")
-
-
-def test_assessment_renders_result(registered_user, page):
-    """Submit a self-report and verify the verdict renders."""
-    _login(page)
-    page.fill("textarea[name=self_report]", "I write tests and report bugs.")
+def submit_report(page: Page, text: str = "I write tests and report bugs.") -> None:
+    page.fill("textarea[name=self_report]", text)
     page.click("button:has-text('Get assessment')")
     page.wait_for_selector("text=Overall verdict")
 
+
+def test_first_page_is_role_selector_not_login(page: Page):
+    page.goto(BASE)
+    expect(page.get_by_role("heading", name=re.compile("performance", re.I))).to_be_visible()
+    for label in ROLE_LABELS:
+        expect(page.get_by_text(label, exact=True).first).to_be_visible()
+    body = page.inner_text("body").lower()
+    assert "log in" not in body
+    assert "register" not in body
+    assert page.locator("input[type=password]").count() == 0
+
+
+@pytest.mark.parametrize("path", ["/login", "/register", "/profile", "/history"])
+def test_legacy_account_urls_land_on_role_selector(page: Page, path: str):
+    page.goto(f"{BASE}{path}")
+    expect(page.get_by_text("1. Your role")).to_be_visible()
+
+
+def test_deep_link_to_assess_without_choice_redirects_to_start(page: Page):
+    page.goto(f"{BASE}/assess")
+    expect(page.get_by_text("1. Your role")).to_be_visible()
+    assert page.url.rstrip("/") == BASE.rstrip("/")
+
+
+def test_level_requires_role_first(page: Page):
+    page.goto(BASE)
+    expect(page.locator("select[name=level]")).to_be_disabled()
+    expect(page.get_by_role("button", name="Continue")).to_be_disabled()
+
+
+def test_qa_flow_without_account_end_to_end(page: Page):
+    page.goto(BASE)
+    pick_role(page, "QA Engineer", "Senior QA Engineer")
+    page.wait_for_url(f"{BASE}/assess")
+    expect(page.get_by_text("Senior QA Engineer").first).to_be_visible()
+
+    submit_report(page)
     text = page.inner_text("body")
     assert "Overall verdict" in text
-    assert "Meets" in text
     assert "trending" in text.lower()
-
-
-def test_result_shows_all_six_dimensions(registered_user, page):
-    """Every scorecard dimension must appear in the rendered result."""
-    _login(page)
-    page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Get assessment')")
-    page.wait_for_selector("text=Overall verdict")
-
-    text = page.inner_text("body")
     for dim in [
         "Technical execution & automation",
         "Test strategy & quality ownership",
@@ -118,51 +96,48 @@ def test_result_shows_all_six_dimensions(registered_user, page):
         assert dim in text, f"Missing dimension: {dim}"
 
 
-def test_history_records_assessment(registered_user, page):
-    """After an assessment the history page shows a result."""
-    _login(page)
-    page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Get assessment')")
-    page.wait_for_selector("text=Overall verdict")
-
-    page.goto(f"{BASE}/history")
-    page.wait_for_selector("text=Loading…", state="detached")
-    text = page.inner_text("body")
-    assert "Meets" in text
-    assert "No assessments yet" not in text
+NEW_ROLES = [
+    ("Project Manager", "Senior Project Manager", "Risk & issue management"),
+    ("Product Manager", "Senior Product Manager", "Discovery & customer insight"),
+    ("DevOps Engineer", "Senior DevOps Engineer", "CI/CD & automation"),
+    ("Security Specialist", "Senior Security Engineer", "Threat modeling & risk assessment"),
+    ("HR / People", "Senior HR Business Partner", "People analytics & data"),
+]
 
 
-def test_data_isolation_ui(registered_user, page, browser):
-    """User B cannot see user A's history."""
-    _login(page)
-    page.fill("textarea[name=self_report]", "I write tests and report bugs.")
-    page.click("button:has-text('Get assessment')")
-    page.wait_for_selector("text=Overall verdict")
-
-    # Fresh context = fresh session cookie → User B
-    ctx_b = browser.new_context()
-    page_b = ctx_b.new_page()
-    page_b.goto(f"{BASE}/register")
-    page_b.fill("input[name=email]", "ui_isolation@example.com")
-    page_b.fill("input[name=password]", "pw2testpass")
-    page_b.click("button:has-text('Register')")
-    page_b.wait_for_url(f"{BASE}/profile", wait_until="commit")
-    page_b.fill("input[name=display_name]", "Other")
-    page_b.select_option("select[name=role]", "qa")
-    page_b.select_option("select[name=level]", "senior_qa")
-    page_b.click("button:has-text('Save profile')")
-    page_b.wait_for_url(f"{BASE}/", wait_until="commit")
-
-    page_b.goto(f"{BASE}/history")
-    page_b.wait_for_selector("text=Loading…", state="detached")
-    assert "No assessments yet" in page_b.inner_text("body")
-    ctx_b.close()
+@pytest.mark.parametrize(("role", "level", "dimension"), NEW_ROLES)
+def test_new_roles_assess_against_their_own_scorecard(
+    page: Page, role: str, level: str, dimension: str
+):
+    page.goto(BASE)
+    pick_role(page, role, level)
+    page.wait_for_url(f"{BASE}/assess")
+    submit_report(page, "I ran the main initiative this cycle.")
+    assert dimension in page.inner_text("body")
+    assert "Technical execution & automation" not in page.inner_text("body")
 
 
-@pytest.mark.parametrize("path", ["/login", "/register"])
-def test_authenticated_user_is_redirected_away_from_auth_pages(registered_user, page, path):
-    """A logged-in user opening /login or /register lands on the app, not a blank page."""
-    _login(page)
-    page.goto(f"{BASE}{path}")
-    page.wait_for_url(f"{BASE}/", wait_until="commit")
-    page.wait_for_selector("textarea[name=self_report]")
+def test_tips_are_role_specific(page: Page):
+    page.goto(BASE)
+    pick_role(page, "Security Specialist", "Senior Security Engineer")
+    page.click("text=Tips for a stronger self assessment")
+    assert "threat model" in page.inner_text("body").lower()
+
+
+def test_selection_survives_reload_and_can_be_changed(page: Page):
+    page.goto(BASE)
+    pick_role(page, "DevOps Engineer", "DevOps Engineer")
+    page.wait_for_url(f"{BASE}/assess")
+    page.reload()
+    expect(page.get_by_test_id("current-role")).to_have_text("DevOps Engineer")
+
+    page.click("text=Change role")
+    page.wait_for_url(re.compile(re.escape(BASE) + r"/?$"))
+    expect(page.locator("select[name=level]")).to_have_value("mid_devops")
+
+
+def test_empty_self_assessment_cannot_be_submitted(page: Page):
+    page.goto(BASE)
+    pick_role(page, "Developer", "Senior Developer")
+    page.wait_for_url(f"{BASE}/assess")
+    expect(page.get_by_role("button", name="Get assessment")).to_be_disabled()
