@@ -1,10 +1,8 @@
-export interface Profile {
-  display_name: string
-  title: string
-  level: string
+export interface AssessInput {
+  self_report: string
   scorecard_role: string
-  company: string | null
-  tech_context: string | null
+  company?: string | null
+  tech_context?: string | null
 }
 
 export interface DimensionScore {
@@ -20,12 +18,4 @@ export interface AssessResult {
   trending: string | null
   dimensions: DimensionScore[]
   recommendations: string[]
-}
-
-export interface HistoryItem {
-  id: number
-  created_at: string
-  self_report: string
-  overall_band: string
-  result_json: string
 }

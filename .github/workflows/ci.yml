@@ -110,6 +110,7 @@ jobs:
       - name: Start the app (stubbed LLM)
         env:
           LLM_PROVIDER: stub
+          ASSESS_RATE_LIMIT_PER_HOUR: "0"
           DATABASE_URL: sqlite:///./test.db
           SECRET_KEY: test-secret-ci
         run: |

@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.db.session import init_db
 from app.routes import api, api_auth, api_history, api_profile
+from app.services.ratelimit import RateLimiter
 from app.settings import get_settings
 
 # In production the React frontend is deployed separately (see render.yaml).
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
+    app.state.assess_limiter = RateLimiter(settings.assess_rate_limit_per_hour)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

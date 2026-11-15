@@ -1,4 +1,6 @@
-import { fetchWithRetry } from './client'
-import type { AssessResult } from '../types'
-export const assess = (self_report: string) =>
-  fetchWithRetry<AssessResult>('/api/assess', { method: 'POST', body: JSON.stringify({ self_report }) })
+import { apiFetch } from './client'
+import type { AssessResult, AssessInput } from '../types'
+
+// No account needed: the role/level key and optional context travel with the request.
+export const assess = (input: AssessInput) =>
+  apiFetch<AssessResult>('/api/assess', { method: 'POST', body: JSON.stringify(input) })
